@@ -1,14 +1,13 @@
 import React, { useRef, useState } from 'react';
 import useStore from '../store/useStore';
 
-// Імпорти генераторів та парсера
+// Переконайся, що ці файли існують і в них є потрібні функції
 import { generateVerilog, generateVHDL, generateTestbench } from '../utils/hdl-generator';
-import { parseVerilogToGraph } from '../utils/hdl-parser'; 
+import { parseVerilogToGraph, parseVHDLToGraph } from '../utils/hdl-parser'; // <--- ДОДАЛИ parseVHDLToGraph
 
 export default function Toolbar() {
   const store = useStore();
   
-  // Захист від білого екрану
   if (!store || !store.projects) {
       return <div className="h-12 border-b flex items-center px-4 bg-red-900 text-white">Store Error</div>;
   }
@@ -23,24 +22,16 @@ export default function Toolbar() {
   const activeProject = projects[activeProjectId] || { nodes: [], edges: [], name: 'Untitled' };
   const [showExportMenu, setShowExportMenu] = useState(false);
 
-  // === SAVE (Тільки JSON) ===
   const handleSave = () => {
     if (!activeProject) return;
     try {
-        const flow = { 
-            nodes: activeProject.nodes, 
-            edges: activeProject.edges, 
-            name: activeProject.name 
-        };
+        const flow = { nodes: activeProject.nodes, edges: activeProject.edges, name: activeProject.name };
         const json = JSON.stringify(flow, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = url;
-        link.download = `${activeProject.name}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        link.href = url; link.download = `${activeProject.name}.json`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
         URL.revokeObjectURL(url);
     } catch (e) {
         console.error("Save failed:", e);
@@ -48,7 +39,6 @@ export default function Toolbar() {
     }
   };
 
-  // === OPEN (УНІВЕРСАЛЬНИЙ: JSON + VERILOG) ===
   const handleOpenClick = () => fileInputRef.current && fileInputRef.current.click();
 
   const handleFileChange = (event) => {
@@ -62,95 +52,79 @@ export default function Toolbar() {
       try {
         const content = e.target.result;
 
-        // --- ЛОГІКА ВИБОРУ ФОРМАТУ ---
-        
-        // 1. Якщо це JSON (Рідний формат)
+        // 1. JSON
         if (fileName.endsWith('.json')) {
             const flow = JSON.parse(content);
-            if (!Array.isArray(flow.nodes) || !Array.isArray(flow.edges)) throw new Error("Invalid JSON structure");
-            
+            if (!Array.isArray(flow.nodes) || !Array.isArray(flow.edges)) throw new Error("Invalid JSON");
             loadGraph(flow); 
             if(flow.name) renameProject(activeProjectId, flow.name);
-            console.log("JSON loaded");
         } 
         
-        // 2. Якщо це Verilog (.v або .sv)
+        // 2. VERILOG
         else if (fileName.endsWith('.v') || fileName.endsWith('.sv')) {
             const graph = parseVerilogToGraph(content);
-            
-            if(graph.nodes.length === 0) {
-                alert("Не вдалося розпізнати модулі у Verilog файлі.");
-                return;
-            }
-
+            if(graph.nodes.length === 0) { alert("Verilog: Modules not found."); return; }
             loadGraph(graph);
-            // Використовуємо ім'я файлу як назву проекту
             renameProject(activeProjectId, file.name.replace(/\.[^/.]+$/, "")); 
-            alert("Verilog успішно імпортовано!");
+            alert("Verilog imported!");
         } 
+
+        // 3. VHDL (НОВЕ)
+        else if (fileName.endsWith('.vhd') || fileName.endsWith('.vhdl')) {
+            const graph = parseVHDLToGraph(content);
+            if(graph.nodes.length === 0) { alert("VHDL: Entity/Architecture not found."); return; }
+            loadGraph(graph);
+            renameProject(activeProjectId, file.name.replace(/\.[^/.]+$/, "")); 
+            alert("VHDL imported!");
+        }
         
         else {
-            alert("Невідомий формат файлу. Виберіть .json або .v");
+            alert("Format not supported. Use .json, .v, or .vhd");
         }
 
       } catch (err) {
         console.error(err);
-        alert("Помилка читання файлу: " + err.message);
+        alert("File error: " + err.message);
       }
     };
     
     reader.readAsText(file);
-    event.target.value = ''; // Скидаємо, щоб можна було відкрити той самий файл
+    event.target.value = '';
   };
 
-  // === EXPORT (HDL) ===
   const handleExport = (type) => {
-    if (activeProject.nodes.length === 0) return alert("Схема пуста!");
-    
-    let code = '';
-    let ext = 'v';
-    let suffix = '';
+    if (activeProject.nodes.length === 0) return alert("Empty circuit!");
+    let code = ''; let ext = 'v'; let suffix = '';
 
     try {
-        if (type === 'verilog') {
-            code = generateVerilog(activeProject.nodes, activeProject.edges);
-        } else if (type === 'vhdl') {
-            code = generateVHDL(activeProject.nodes, activeProject.edges);
-            ext = 'vhd';
-        } else if (type === 'testbench') {
-            code = generateTestbench(activeProject.nodes);
-            suffix = '_tb';
-        }
+        if (type === 'verilog') code = generateVerilog(activeProject.nodes, activeProject.edges);
+        else if (type === 'vhdl') { code = generateVHDL(activeProject.nodes, activeProject.edges); ext = 'vhd'; }
+        else if (type === 'testbench') { code = generateTestbench(activeProject.nodes); suffix = '_tb'; }
 
         const blob = new Blob([code], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = url;
-        link.download = `${activeProject.name}${suffix}.${ext}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        link.href = url; link.download = `${activeProject.name}${suffix}.${ext}`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
         URL.revokeObjectURL(url);
         setShowExportMenu(false);
     } catch (e) {
         console.error("Export error:", e);
-        alert("Помилка експорту: " + e.message);
+        alert("Export failed.");
     }
   };
 
   return (
     <div className="flex flex-col border-b" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--sidebar-border)' }}>
       
-      {/* ЄДИНИЙ INPUT ДЛЯ ВСІХ ФАЙЛІВ */}
+      {/* INPUT ДЛЯ ВСІХ ТИПІВ */}
       <input 
-        type="file" 
-        ref={fileInputRef} 
-        style={{ display: 'none' }} 
-        accept=".json,.v,.sv"  // <--- ПРИЙМАЄ ВСЕ
+        type="file" ref={fileInputRef} style={{ display: 'none' }} 
+        accept=".json,.v,.sv,.vhd,.vhdl" // <--- ДОДАЛИ .vhd
         onChange={handleFileChange} 
       />
 
-      {/* ВЕРХНЯ ПАНЕЛЬ */}
+      {/* HEADER */}
       <div className="h-12 flex items-center px-4 justify-between shadow-sm z-20">
         <div className="flex items-center gap-4">
           <h1 className="font-bold text-lg tracking-tight text-blue-500">LogicSim <span className="text-[10px] text-gray-500">PRO</span></h1>
@@ -160,21 +134,20 @@ export default function Toolbar() {
           </div>
         </div>
 
+        {/* SIMULATION CONTROLS */}
         <div className="flex gap-2 bg-black/10 dark:bg-white/5 p-1 rounded">
           {!isRunning ? (
              <button onClick={startSimulation} className="px-4 py-1 text-xs font-bold text-white bg-green-600 hover:bg-green-500 rounded transition">▶ START</button>
           ) : (
              <button onClick={stopSimulation} className="px-4 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded transition animate-pulse">⏹ STOP</button>
           )}
+          {/* STEP ЗАПУСКАЄ НОВУ ЛОГІКУ З useStore */}
           <button onClick={stepSimulation} disabled={isRunning} className="px-3 py-1 text-xs font-bold text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10 disabled:opacity-30 disabled:cursor-not-allowed">⏯ STEP</button>
         </div>
 
-        {/* МЕНЮ ЛИШЕ ДЛЯ ЕКСПОРТУ */}
+        {/* EXPORT MENU */}
         <div className="relative">
-            <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-1 text-xs font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500 flex items-center gap-2">
-              Export HDL ▼
-            </button>
-            
+            <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-1 text-xs font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500 flex items-center gap-2">Export HDL ▼</button>
             {showExportMenu && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded shadow-xl overflow-hidden z-50">
                     <button onClick={() => handleExport('verilog')} className="block w-full text-left px-4 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/10 dark:text-gray-200">Verilog (.v)</button>
@@ -186,7 +159,7 @@ export default function Toolbar() {
         </div>
       </div>
       
-      {/* Вкладки */}
+      {/* TABS (Без змін) */}
       <div className="flex items-end px-2 gap-1 overflow-x-auto h-8 bg-black/5 dark:bg-black/20">
          {projects && Object.values(projects).map(p => (
             <div key={p.id} onClick={() => setActiveProject(p.id)} className={`group flex items-center gap-2 px-3 py-1.5 text-xs font-bold cursor-pointer rounded-t-lg select-none min-w-[100px] border-t border-x ${p.id === activeProjectId ? 'bg-[var(--bg-color)] border-[var(--sidebar-border)] text-[var(--text-primary)] relative top-[1px]' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5'}`}>
