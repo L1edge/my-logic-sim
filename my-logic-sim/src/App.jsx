@@ -4,11 +4,10 @@ import 'reactflow/dist/style.css';
 import { nanoid } from 'nanoid'; 
 import useStore from './store/useStore';
 
-// Імпорти нових компонентів
+// ... (імпорти компонентів Toolbar, Sidebar, Nodes залишаються ті самі) ...
 import Sidebar from './components/Sidebar';
-import Toolbar from './components/Toolbar';            // <--- НОВЕ
-import PropertiesPanel from './components/PropertiesPanel'; // <--- НОВЕ
-
+import Toolbar from './components/Toolbar';
+import PropertiesPanel from './components/PropertiesPanel';
 import LogicGate from './components/nodes/LogicGate';
 import InputNode from './components/nodes/InputNode';
 import OutputNode from './components/nodes/OutputNode';
@@ -23,14 +22,28 @@ const nodeTypes = {
 
 function Flow() {
   const wrapper = useRef(null);
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, deleteEdge, theme } = useStore();
+  
+  // ДІСТАЄМО ДАНІ НОВИМ СПОСОБОМ
+  const { 
+    getNodes, getEdges, // Функції-геттери
+    onNodesChange, onEdgesChange, onConnect, addNode, deleteEdge, 
+    theme, activeProjectId 
+  } = useStore();
+
+  // Оскільки React Flow хоче масиви, викликаємо геттери
+  const nodes = getNodes();
+  const edges = getEdges();
 
   useEffect(() => {
     const appContainer = document.getElementById('app-container');
     if (appContainer) appContainer.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const onDragOver = useCallback((event) => {
+  // ... (onDragOver, onDrop, onEdgeDoubleClick - ЗАЛИШАЮТЬСЯ БЕЗ ЗМІН) ...
+  // Скопіюй їх зі старого файлу або я можу повторити, якщо треба. 
+  // Головне - в onDrop при створенні newNode переконайся, що структура data правильна.
+
+    const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
@@ -68,23 +81,19 @@ function Flow() {
     deleteEdge(edge.id);
   }, [deleteEdge]);
 
+
   return (
-    // ГОЛОВНИЙ КОНТЕЙНЕР: Flex Column (Верх + Низ)
     <div id="app-container" className="flex flex-col h-screen w-screen relative overflow-hidden transition-colors duration-300" data-theme={theme}>
       <div className="app-background"></div>
 
-      {/* 1. ВЕРХНЯ ПАНЕЛЬ */}
       <Toolbar />
 
-      {/* 2. РОБОЧА ЗОНА: Flex Row (Ліво + Центр + Право) */}
       <div className="flex flex-1 overflow-hidden">
-        
-        {/* ЛІВА ПАНЕЛЬ */}
         <Sidebar />
 
-        {/* ЦЕНТРАЛЬНИЙ КАНВАС */}
         <div className="flex-grow h-full relative" ref={wrapper}>
           <ReactFlow
+            key={activeProjectId} // ВАЖЛИВО: при зміні вкладки ReactFlow перемонтується
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -102,9 +111,7 @@ function Flow() {
           </ReactFlow>
         </div>
 
-        {/* ПРАВА ПАНЕЛЬ */}
         <PropertiesPanel />
-      
       </div>
     </div>
   );

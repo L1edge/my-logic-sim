@@ -6,6 +6,9 @@ export default function InputNode({ data, id, selected }) {
   const updateNodeValue = useStore((state) => state.updateNodeValue);
   const [radix, setRadix] = useState(10);
   const [inputValue, setInputValue] = useState(data.value.toString());
+  
+  // Дістаємо лейбл
+  const labelText = data.label || '';
 
   const handleRadixChange = (e) => {
     const newRadix = parseInt(e.target.value);
@@ -46,12 +49,12 @@ export default function InputNode({ data, id, selected }) {
           className="text-[10px] rounded focus:outline-none cursor-pointer border ml-2"
           value={radix}
           onChange={handleRadixChange}
-          // Стилізуємо сам селект, щоб він не був білим у темній темі
           style={{
              backgroundColor: 'var(--node-input-bg)',
              color: 'var(--node-input-val-color)',
              borderColor: 'var(--node-input-border)'
           }}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           <option value={2}>BIN</option>
           <option value={10}>DEC</option>
@@ -68,7 +71,7 @@ export default function InputNode({ data, id, selected }) {
           className="w-full text-center font-mono text-lg border-b focus:outline-none focus:border-green-500 bg-transparent"
           style={{
             color: 'var(--node-input-val-color)',
-            borderColor: 'var(--sidebar-border)' // трохи сірого бордера
+            borderColor: 'var(--sidebar-border)' 
           }}
         />
       </div>
@@ -79,6 +82,21 @@ export default function InputNode({ data, id, selected }) {
         className="!w-4 !h-4 !bg-green-500 !border-2 !border-white hover:!bg-green-400 hover:scale-110 transition-transform" 
         style={{ right: -8 }} 
       />
+
+      {/* === ПІДПИС (LABEL) === */}
+      {labelText && (
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none">
+          <span 
+              className="text-[10px] font-medium font-mono px-1.5 py-0.5 rounded border border-white/10"
+              style={{ 
+                backgroundColor: 'var(--sidebar-bg)', 
+                color: 'var(--text-primary)' 
+              }}
+          >
+              {labelText}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,6 +4,9 @@ import { Handle, Position } from 'reactflow';
 export default function OutputNode({ data, selected }) {
   const [radix, setRadix] = useState(10);
   const displayValue = (data.value || 0).toString(radix).toUpperCase();
+  
+  // Дістаємо лейбл
+  const labelText = data.label || '';
 
   return (
     <div 
@@ -40,6 +43,7 @@ export default function OutputNode({ data, selected }) {
              color: 'var(--node-output-val-color)',
              borderColor: 'var(--node-output-border)'
           }}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           <option value={2}>BIN</option>
           <option value={10}>DEC</option>
@@ -55,6 +59,21 @@ export default function OutputNode({ data, selected }) {
           {displayValue}
         </span>
       </div>
+
+      {/* === ПІДПИС (LABEL) === */}
+      {labelText && (
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none">
+          <span 
+              className="text-[10px] font-medium font-mono px-1.5 py-0.5 rounded border border-white/10"
+              style={{ 
+                backgroundColor: 'var(--sidebar-bg)', 
+                color: 'var(--text-primary)' 
+              }}
+          >
+              {labelText}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { Handle, Position } from 'reactflow';
 import useStore from '../../store/useStore';
 
+// === 1. SVG ШЛЯХИ ===
 const gateSVG = {
   AND: (isActive, color) => (
     <path d="M 0 0 L 0 50 L 35 50 C 65 50 80 25 80 25 C 80 25 65 0 35 0 Z" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
@@ -21,10 +22,13 @@ const gateSVG = {
       <path d="M 3 0 C 18 5 18 45 3 50 C 43 50 83 25 83 25 C 83 25 43 0 3 0 Z" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
     </>
   ),
+  // === ОНОВЛЕНИЙ NOT (ТРИКУТНИК ЗМІЩЕНИЙ ВПРАВО) ===
   NOT: (isActive, color) => (
     <>
-      <path d="M 0 0 L 0 50 L 65 25 Z" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
-      <circle cx="72" cy="25" r="6" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
+      {/* Тіло трикутника (подовжили з 55 до 58) */}
+      <path d="M 0 0 L 0 50 L 58 25 Z" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
+      {/* Кружечок (змістили центр з 62 до 65) */}
+      <circle cx="65" cy="25" r="6" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
     </>
   ),
 };
@@ -40,84 +44,105 @@ const gateColors = {
 export default memo(function LogicGate({ id, data, selected }) {
   const updateNodeData = useStore((state) => state.updateNodeData);
   
-  const isActive = data.value > 0;
-  const type = data.type || 'AND';
+  const hasSignal = data.value !== null && data.value !== undefined;
+  const isHigh = data.value > 0;
+  const isLow = data.value === 0;
+
+  // Очищення типу
+  let type = data.type || 'AND';
+  if (type.includes('NOT')) type = 'NOT';
+
   const colors = gateColors[type] || gateColors.AND;
   const renderSvg = gateSVG[type] || gateSVG.AND;
   
   const inputsCount = type === 'NOT' ? 1 : (data.inputs || 2);
-
-  // === ГОЛОВНИЙ ФІКС: ДИНАМІЧНА ВИСОТА ===
-  // Якщо входів > 3, додаємо по 20 пікселів на кожен
-  // Це розтягне гейт вертикально
-  const dynamicHeight = Math.max(60, inputsCount * 20);
+  const dynamicHeight = type === 'NOT' ? 50 : Math.max(60, inputsCount * 20);
 
   const handleInputChange = (e) => {
     updateNodeData(id, { inputs: parseInt(e.target.value) });
   };
 
   const inputLeftOffset = (type === 'OR' || type === 'XOR') ? 8 : -2; 
-  const outputRightOffset = (type === 'NOT' || type === 'NAND') ? -10 : -4;
-  const handleStyle = "!w-3 !h-3 !bg-gray-400 !border-2 !border-white hover:!bg-green-400 transition-colors";
+  
+  // === ФІКС ЗМІЩЕННЯ ВИХОДУ ===
+  // Для NOT ставимо -5 (висуваємо handle назовні, щоб він був на кінчику круга)
+  // Раніше було 12 (всередині), тепер -5.
+  const outputRightOffset = (type === 'NOT') ? -5 : (type === 'NAND' ? -10 : -4);
+  
+  let outputHandleColor = '!bg-gray-400';
+  if (isHigh) outputHandleColor = '!bg-green-500 !border-green-200';
+  if (isLow) outputHandleColor = '!bg-red-500 !border-red-200';
 
-  const inputsArray = Array.from({ length: inputsCount });
+  const labelText = data.label || ''; 
 
   return (
     <div 
       className={`relative transition-transform group
-      ${isActive ? 'scale-105 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' : ''}
-      ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+      ${isHigh ? 'drop-shadow-[0_0_10px_rgba(34,197,94,0.6)]' : ''} 
+      ${isLow ? 'drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]' : ''} 
+      ${selected ? 'ring-2 ring-blue-500 ring-offset-4' : ''}
       `}
-      style={{ width: 90, height: dynamicHeight }} // <--- Висота тепер змінюється
+      style={{ width: type === 'NOT' ? 70 : 90, height: dynamicHeight }} 
     >
       <svg 
-        width="100" 
-        height={dynamicHeight} // <--- SVG теж росте
-        viewBox={type === 'XOR' ? "-5 0 95 50" : "0 0 90 50"} 
-        preserveAspectRatio="none" // <--- ЦЕ РОЗТЯГУЄ МАЛЮНОК, ЩОБ ВІН ЗАПОВНИВ ВИСОТУ
+        width="100%" height="100%" 
+        viewBox={type === 'XOR' ? "-5 0 95 50" : (type === 'NOT' ? "0 0 70 50" : "0 0 90 50")} 
+        preserveAspectRatio="none"
         className="absolute top-0 left-0 overflow-visible"
       >
-        {renderSvg(isActive, colors)}
+        {renderSvg(isHigh || isLow, colors)} 
       </svg>
       
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-[10px] font-bold text-white/60">{type}</span>
+          <span className={`text-[10px] font-bold text-white/80 drop-shadow-md tracking-wider ${type === 'NOT' ? '-ml-2' : ''}`}>
+            {type}
+          </span>
       </div>
 
       {type !== 'NOT' && (
         <select 
-          className="absolute -top-6 left-0 text-[10px] border rounded bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer focus:outline-none shadow-sm z-50"
+          className="absolute -top-6 left-0 text-[10px] border rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer focus:outline-none shadow-sm z-50 h-5"
           value={inputsCount}
           onChange={handleInputChange}
           onMouseDown={(e) => e.stopPropagation()}
+          style={{ backgroundColor: 'var(--sidebar-bg)', color: 'var(--text-primary)', borderColor: 'var(--sidebar-border)' }}
         >
-          {[2, 3, 4, 5, 6, 7, 8].map(num => (
-            <option key={num} value={num}>{num} in</option>
-          ))}
+          {[2, 3, 4, 5, 6, 7, 8].map(num => (<option key={num} value={num}>{num} in</option>))}
         </select>
       )}
 
-      {/* Входи тепер будуть мати нормальні відступи */}
-      {inputsArray.map((_, i) => (
+      {/* ВХОДИ */}
+      {type === 'NOT' ? (
         <Handle
-          key={i}
-          type="target" 
-          position={Position.Left} 
-          id={`input-${i}`} 
-          className={handleStyle}
-          style={{ 
-            // Розподіляємо їх від 10% до 90% висоти
-            top: `${10 + (i * (80 / (inputsCount - 1 || 1)))}%`, 
-            left: inputLeftOffset 
-          }}
+          type="target" position={Position.Left} id="input-0"
+          className="!w-3 !h-3 !bg-gray-400 !border-2 !border-white hover:!bg-green-400 transition-colors"
+          style={{ top: '50%', left: -2 }}
         />
-      ))}
+      ) : (
+        Array.from({ length: inputsCount }).map((_, i) => (
+          <Handle
+            key={i} type="target" position={Position.Left} id={`input-${i}`} 
+            className="!w-3 !h-3 !bg-gray-400 !border-2 !border-white hover:!bg-green-400 transition-colors"
+            style={{ top: `${10 + (i * (80 / (inputsCount - 1 || 1)))}%`, left: inputLeftOffset }}
+          />
+        ))
+      )}
 
+      {/* ВИХІД (Зсунутий) */}
       <Handle
         type="source" position={Position.Right}
-        className={`!w-4 !h-4 !border-2 !border-white transition-colors ${isActive ? '!bg-green-400' : '!bg-gray-200 hover:!bg-green-300'}`}
+        className={`!w-4 !h-4 !border-2 !border-white transition-colors ${outputHandleColor}`}
         style={{ right: outputRightOffset, top: '50%' }} 
       />
+
+      {labelText && (
+          <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none">
+            <span className="text-[10px] font-medium font-mono px-1.5 py-0.5 rounded border border-white/10"
+                style={{ backgroundColor: 'var(--sidebar-bg)', color: 'var(--text-primary)' }}>
+                {labelText}
+            </span>
+          </div>
+      )}
     </div>
   );
 });
