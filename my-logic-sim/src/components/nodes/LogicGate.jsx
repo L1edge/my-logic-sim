@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 import { Handle, Position } from 'reactflow';
 import useStore from '../../store/useStore';
 
-// === 1. SVG ШЛЯХИ ===
 const gateSVG = {
   AND: (isActive, color) => (
     <path d="M 0 0 L 0 50 L 35 50 C 65 50 80 25 80 25 C 80 25 65 0 35 0 Z" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
@@ -22,12 +21,9 @@ const gateSVG = {
       <path d="M 3 0 C 18 5 18 45 3 50 C 43 50 83 25 83 25 C 83 25 43 0 3 0 Z" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
     </>
   ),
-  // === ОНОВЛЕНИЙ NOT (ТРИКУТНИК ЗМІЩЕНИЙ ВПРАВО) ===
   NOT: (isActive, color) => (
     <>
-      {/* Тіло трикутника (подовжили з 55 до 58) */}
       <path d="M 0 0 L 0 50 L 58 25 Z" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
-      {/* Кружечок (змістили центр з 62 до 65) */}
       <circle cx="65" cy="25" r="6" fill={isActive ? color.fill : '#374151'} stroke={color.border} strokeWidth="2" />
     </>
   ),
@@ -48,25 +44,25 @@ export default memo(function LogicGate({ id, data, selected }) {
   const isHigh = data.value > 0;
   const isLow = data.value === 0;
 
-  // Очищення типу
+  // Очистка типу
   let type = data.type || 'AND';
   if (type.includes('NOT')) type = 'NOT';
 
   const colors = gateColors[type] || gateColors.AND;
   const renderSvg = gateSVG[type] || gateSVG.AND;
   
+  // Кількість входів
   const inputsCount = type === 'NOT' ? 1 : (data.inputs || 2);
-  const dynamicHeight = type === 'NOT' ? 50 : Math.max(60, inputsCount * 20);
+  
+  // === ЗМІНА 1: ЗБІЛЬШИЛИ МНОЖНИК ВИСОТИ ===
+  // Було * 20, стало * 30. Це дасть більше простору між портами.
+  const dynamicHeight = type === 'NOT' ? 50 : Math.max(60, inputsCount * 30);
 
   const handleInputChange = (e) => {
     updateNodeData(id, { inputs: parseInt(e.target.value) });
   };
 
   const inputLeftOffset = (type === 'OR' || type === 'XOR') ? 8 : -2; 
-  
-  // === ФІКС ЗМІЩЕННЯ ВИХОДУ ===
-  // Для NOT ставимо -5 (висуваємо handle назовні, щоб він був на кінчику круга)
-  // Раніше було 12 (всередині), тепер -5.
   const outputRightOffset = (type === 'NOT') ? -5 : (type === 'NAND' ? -10 : -4);
   
   let outputHandleColor = '!bg-gray-400';
@@ -99,6 +95,7 @@ export default memo(function LogicGate({ id, data, selected }) {
           </span>
       </div>
 
+      {/* Список тільки якщо НЕ NOT */}
       {type !== 'NOT' && (
         <select 
           className="absolute -top-6 left-0 text-[10px] border rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer focus:outline-none shadow-sm z-50 h-5"
@@ -116,23 +113,32 @@ export default memo(function LogicGate({ id, data, selected }) {
         <Handle
           type="target" position={Position.Left} id="input-0"
           className="!w-3 !h-3 !bg-gray-400 !border-2 !border-white hover:!bg-green-400 transition-colors"
-          style={{ top: '50%', left: -2 }}
+          style={{ top: '50%', left: -2, zIndex: 50 }} 
         />
       ) : (
+        // === ЗМІНА 2: ПОКРАЩЕНА ПОЗИЦІЯ І Z-INDEX ===
         Array.from({ length: inputsCount }).map((_, i) => (
           <Handle
-            key={i} type="target" position={Position.Left} id={`input-${i}`} 
+            key={i} 
+            type="target" 
+            position={Position.Left} 
+            id={`input-${i}`} 
             className="!w-3 !h-3 !bg-gray-400 !border-2 !border-white hover:!bg-green-400 transition-colors"
-            style={{ top: `${10 + (i * (80 / (inputsCount - 1 || 1)))}%`, left: inputLeftOffset }}
+            style={{ 
+              // Використовуємо 15% та 85% як межі, щоб не лізли на самі краї
+              top: `${15 + (i * (70 / (inputsCount - 1 || 1)))}%`, 
+              left: inputLeftOffset,
+              zIndex: 50 // <--- ВАЖЛИВО! Це робить порт клікабельним поверх всього іншого
+            }}
           />
         ))
       )}
 
-      {/* ВИХІД (Зсунутий) */}
+      {/* ВИХІД */}
       <Handle
         type="source" position={Position.Right}
         className={`!w-4 !h-4 !border-2 !border-white transition-colors ${outputHandleColor}`}
-        style={{ right: outputRightOffset, top: '50%' }} 
+        style={{ right: outputRightOffset, top: '50%', zIndex: 50 }} 
       />
 
       {labelText && (

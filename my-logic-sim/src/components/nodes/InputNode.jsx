@@ -1,27 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
 import useStore from '../../store/useStore';
 
 export default function InputNode({ data, id, selected }) {
-  const updateNodeValue = useStore((state) => state.updateNodeValue);
+  // 1. ВИПРАВЛЕННЯ: Використовуємо правильну функцію updateNodeData
+  const updateNodeData = useStore((state) => state.updateNodeData);
   const [radix, setRadix] = useState(10);
-  const [inputValue, setInputValue] = useState(data.value.toString());
   
-  // Дістаємо лейбл
+  // Беремо значення зі стору (або 0, якщо пусто)
+  const safeValue = data.value !== null && data.value !== undefined ? data.value : 0;
+  
+  const [inputValue, setInputValue] = useState(safeValue.toString(radix));
   const labelText = data.label || '';
+
+  // Синхронізація: якщо значення змінилось ззовні (наприклад, при завантаженні файлу)
+  useEffect(() => {
+    const val = data.value !== null && data.value !== undefined ? data.value : 0;
+    setInputValue(val.toString(radix).toUpperCase());
+  }, [data.value, radix]);
 
   const handleRadixChange = (e) => {
     const newRadix = parseInt(e.target.value);
     setRadix(newRadix);
-    setInputValue(data.value.toString(newRadix).toUpperCase());
+    setInputValue(safeValue.toString(newRadix).toUpperCase());
   };
 
   const handleChange = (e) => {
     const rawValue = e.target.value;
     setInputValue(rawValue);
+    
     const parsedValue = parseInt(rawValue, radix);
     if (!isNaN(parsedValue)) {
-      updateNodeValue(id, parsedValue);
+      // 2. ВИПРАВЛЕННЯ: Передаємо об'єкт { value: ... }
+      updateNodeData(id, { value: parsedValue });
+    } else if (rawValue === '') {
+       updateNodeData(id, { value: 0 });
     }
   };
 
@@ -35,7 +48,6 @@ export default function InputNode({ data, id, selected }) {
         borderColor: 'var(--node-input-border)'
       }}
     >
-      {/* Шапка */}
       <div 
         className="px-2 py-1 flex justify-between items-center border-b"
         style={{
@@ -62,7 +74,6 @@ export default function InputNode({ data, id, selected }) {
         </select>
       </div>
 
-      {/* Поле вводу */}
       <div className="p-2">
         <input 
           type="text" 
@@ -83,7 +94,6 @@ export default function InputNode({ data, id, selected }) {
         style={{ right: -8 }} 
       />
 
-      {/* === ПІДПИС (LABEL) === */}
       {labelText && (
         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none">
           <span 

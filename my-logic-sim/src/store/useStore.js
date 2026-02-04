@@ -3,7 +3,7 @@ import { addEdge, applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import { evaluateCircuit } from '../utils/logic';
 import { nanoid } from 'nanoid';
 
-// Початковий проект
+// Генеруємо ID для першого проекту при запуску
 const defaultProjectId = nanoid();
 
 const useStore = create((set, get) => ({
@@ -41,14 +41,16 @@ const useStore = create((set, get) => ({
   closeProject: (id) => {
     set(state => {
       const { [id]: _, ...rest } = state.projects;
-      // Якщо закрили активний, перемикаємось на перший доступний
-      const newActive = id === state.activeProjectId ? Object.keys(rest)[0] : state.activeProjectId;
-      // Якщо закрили останній, створюємо новий пустий
+      // Якщо закрили активний проект, перемикаємось на інший або створюємо новий
+      const newActive = id === state.activeProjectId 
+        ? (Object.keys(rest)[0] || nanoid()) 
+        : state.activeProjectId;
+      
+      // Якщо закрили останній - створюємо новий пустий
       if (Object.keys(rest).length === 0) {
-        const newId = nanoid();
-        return {
-          projects: { [newId]: { id: newId, name: 'Untitled', nodes: [], edges: [] } },
-          activeProjectId: newId
+        return { 
+          projects: { [newActive]: { id: newActive, name: 'Untitled', nodes: [], edges: [] } }, 
+          activeProjectId: newActive 
         };
       }
       return { projects: rest, activeProjectId: newActive };
@@ -66,7 +68,7 @@ const useStore = create((set, get) => ({
     }));
   },
 
-  // === ЗАВАНТАЖЕННЯ ===
+  // === ЗАВАНТАЖЕННЯ / ЗБЕРЕЖЕННЯ ===
   loadGraph: (flow) => {
     const { activeProjectId } = get();
     set(state => ({
@@ -79,18 +81,18 @@ const useStore = create((set, get) => ({
         }
       }
     }));
-    // Примусовий перерахунок 1 раз
-    get().stepSimulation(); 
+    // При завантаженні зупиняємо симуляцію, щоб уникнути конфліктів
+    get().stopSimulation();
   },
 
-  // === REACT FLOW ACTIONS (працюють з активним проектом) ===
+  // === ГЕТТЕРИ (Для React Flow) ===
   getNodes: () => get().projects[get().activeProjectId]?.nodes || [],
   getEdges: () => get().projects[get().activeProjectId]?.edges || [],
 
+  // === ОБРОБНИКИ ПОДІЙ REACT FLOW ===
   onNodesChange: (changes) => {
     const { activeProjectId, projects, isRunning } = get();
     const currentProject = projects[activeProjectId];
-    
     const newNodes = applyNodeChanges(changes, currentProject.nodes);
     
     set({
@@ -100,16 +102,13 @@ const useStore = create((set, get) => ({
       }
     });
 
-    // Якщо симуляція запущена - рахуємо, якщо ні - чекаємо кнопки
-    if (isRunning) {
-        get().runSimulationStep();
-    }
+    // Якщо симуляція активна, перераховуємо схему на льоту
+    if (isRunning) get().runSimulationStep();
   },
 
   onEdgesChange: (changes) => {
     const { activeProjectId, projects, isRunning } = get();
     const currentProject = projects[activeProjectId];
-    
     const newEdges = applyEdgeChanges(changes, currentProject.edges);
     
     set({
@@ -122,12 +121,14 @@ const useStore = create((set, get) => ({
     if (isRunning) get().runSimulationStep();
   },
 
+  // ПІДКЛЮЧЕННЯ ДРОТІВ
   onConnect: (connection) => {
     const { activeProjectId, projects, isRunning } = get();
     const currentProject = projects[activeProjectId];
 
     const newEdges = addEdge({ 
       ...connection, 
+      type: 'smoothstep', // Ламані лінії (90 градусів)
       animated: false, 
       style: { stroke: '#555', strokeWidth: 2 } 
     }, currentProject.edges);
@@ -171,9 +172,6 @@ const useStore = create((set, get) => ({
       }
     });
     
-    // Якщо змінили вхідні дані (світч), то варто оновити схему навіть на паузі, 
-    // або можна заборонити це. Зазвичай в CAD дозволяють зміну, але розрахунок йде тільки в Run/Step.
-    // Але для зручності:
     if (isRunning) get().runSimulationStep();
   },
 
@@ -193,41 +191,92 @@ const useStore = create((set, get) => ({
     if (isRunning) get().runSimulationStep();
   },
 
-  // === СИМУЛЯЦІЯ (Control) ===
+  // === ЛОГІКА СИМУЛЯЦІЇ ===
+  
   startSimulation: () => {
-    if (get().intervalId) return; // Вже запущено
+    if (get().intervalId) return; 
     
+    // Робимо перший крок одразу
+    get().runSimulationStep();
+
+    // Запускаємо цикл (10 кадрів на секунду)
     const interval = setInterval(() => {
         get().runSimulationStep();
-    }, 100); // 100ms - частота оновлення (10 FPS)
+    }, 100); 
 
     set({ isRunning: true, intervalId: interval });
-  },
-
-  stopSimulation: () => {
-    const { intervalId } = get();
-    if (intervalId) clearInterval(intervalId);
-    set({ isRunning: false, intervalId: null });
   },
 
   stepSimulation: () => {
     get().runSimulationStep();
   },
 
-  // Внутрішня функція розрахунку одного кадру
+  // === ВИПРАВЛЕНИЙ STOP ===
+  // Скидає логіку, але зберігає введені дані користувача
+  stopSimulation: () => {
+    const { intervalId, activeProjectId, projects } = get();
+    if (intervalId) clearInterval(intervalId);
+
+    const currentProject = projects[activeProjectId];
+
+    // 1. Очищуємо стани (value), але ОБЕРЕЖНО
+    const resetNodes = currentProject.nodes.map(node => {
+        // ВАЖЛИВО: Не чіпаємо InputNode та ConstantNode, щоб не втратити дані і не крашити App
+        if (node.type === 'inputNode' || node.type === 'constantNode') {
+            return node;
+        }
+        // Для гейтів та LED скидаємо значення в null (вимкнено)
+        return {
+            ...node,
+            data: { 
+                ...node.data, 
+                value: null 
+            }
+        };
+    });
+
+    // 2. Скидаємо дроти (робимо сірими, без анімації)
+    const resetEdges = currentProject.edges.map(edge => ({
+        ...edge,
+        animated: false,
+        type: 'smoothstep',
+        style: { ...edge.style, stroke: '#555', strokeWidth: 2 }
+    }));
+
+    set({ 
+        isRunning: false, 
+        intervalId: null,
+        projects: {
+            ...projects,
+            [activeProjectId]: {
+                ...currentProject,
+                nodes: resetNodes,
+                edges: resetEdges
+            }
+        }
+    });
+  },
+
+  // Розрахунок одного такту
   runSimulationStep: () => {
     const { activeProjectId, projects } = get();
     const currentProject = projects[activeProjectId];
 
     const { updatedNodes, updatedEdges } = evaluateCircuit(currentProject.nodes, currentProject.edges);
     
+    // При оновленні дротів зберігаємо тип 'smoothstep'
+    const preservedEdges = updatedEdges.map(e => ({
+        ...e,
+        type: 'smoothstep'
+    }));
+
     set({
       projects: {
         ...projects,
         [activeProjectId]: { 
             ...currentProject, 
             nodes: updatedNodes, 
-            edges: updatedEdges 
+            edges: preservedEdges 
         }
       }
     });
