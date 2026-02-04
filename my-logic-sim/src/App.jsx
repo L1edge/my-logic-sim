@@ -3,7 +3,12 @@ import ReactFlow, { Background, Controls, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { nanoid } from 'nanoid'; 
 import useStore from './store/useStore';
+
+// Імпорти нових компонентів
 import Sidebar from './components/Sidebar';
+import Toolbar from './components/Toolbar';            // <--- НОВЕ
+import PropertiesPanel from './components/PropertiesPanel'; // <--- НОВЕ
+
 import LogicGate from './components/nodes/LogicGate';
 import InputNode from './components/nodes/InputNode';
 import OutputNode from './components/nodes/OutputNode';
@@ -22,9 +27,7 @@ function Flow() {
 
   useEffect(() => {
     const appContainer = document.getElementById('app-container');
-    if (appContainer) {
-      appContainer.setAttribute('data-theme', theme);
-    }
+    if (appContainer) appContainer.setAttribute('data-theme', theme);
   }, [theme]);
 
   const onDragOver = useCallback((event) => {
@@ -32,38 +35,33 @@ function Flow() {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const onDrop = useCallback(
-    (event) => {
-      event.preventDefault();
-      const type = event.dataTransfer.getData('application/reactflow');
-      const label = event.dataTransfer.getData('label');
-      const value = event.dataTransfer.getData('value'); 
+  const onDrop = useCallback((event) => {
+    event.preventDefault();
+    const type = event.dataTransfer.getData('application/reactflow');
+    const label = event.dataTransfer.getData('label');
+    const value = event.dataTransfer.getData('value'); 
 
-      if (!type) return;
+    if (!type) return;
 
-      const reactFlowBounds = wrapper.current.getBoundingClientRect();
-      const position = {
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      };
+    const reactFlowBounds = wrapper.current.getBoundingClientRect();
+    const position = {
+      x: event.clientX - reactFlowBounds.left,
+      y: event.clientY - reactFlowBounds.top,
+    };
 
-      const newNode = {
-        id: nanoid(),
-        type,
-        position,
-        data: { 
-            label, 
-            type: label, 
-            value: value ? parseInt(value) : 0, 
-            constantValue: value ? parseInt(value) : undefined,
-            inputs: 2 
-        }, 
-      };
-
-      addNode(newNode);
-    },
-    [addNode]
-  );
+    const newNode = {
+      id: nanoid(),
+      type,
+      position,
+      data: { 
+          label, type: label, 
+          value: value ? parseInt(value) : 0, 
+          constantValue: value ? parseInt(value) : undefined,
+          inputs: 2 
+      }, 
+    };
+    addNode(newNode);
+  }, [addNode]);
 
   const onEdgeDoubleClick = useCallback((event, edge) => {
     event.stopPropagation();
@@ -71,31 +69,42 @@ function Flow() {
   }, [deleteEdge]);
 
   return (
-    <div id="app-container" className="flex h-screen w-screen relative overflow-hidden transition-colors duration-300" data-theme={theme}>
-      {/* Фоновий шар для Glass ефекту */}
+    // ГОЛОВНИЙ КОНТЕЙНЕР: Flex Column (Верх + Низ)
+    <div id="app-container" className="flex flex-col h-screen w-screen relative overflow-hidden transition-colors duration-300" data-theme={theme}>
       <div className="app-background"></div>
 
-      <Sidebar />
-      <div className="flex-grow h-full" ref={wrapper}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
-          onEdgeDoubleClick={onEdgeDoubleClick}
-          deleteKeyCode={['Backspace', 'Delete']}
-          fitView
-          // === ОПТИМІЗАЦІЯ ===
-          onlyRenderVisibleElements={true} 
-          minZoom={0.2}
-        >
-          <Background color={theme === 'light' ? '#aaa' : '#555'} gap={20} size={1} />
-          <Controls />
-        </ReactFlow>
+      {/* 1. ВЕРХНЯ ПАНЕЛЬ */}
+      <Toolbar />
+
+      {/* 2. РОБОЧА ЗОНА: Flex Row (Ліво + Центр + Право) */}
+      <div className="flex flex-1 overflow-hidden">
+        
+        {/* ЛІВА ПАНЕЛЬ */}
+        <Sidebar />
+
+        {/* ЦЕНТРАЛЬНИЙ КАНВАС */}
+        <div className="flex-grow h-full relative" ref={wrapper}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            onEdgeDoubleClick={onEdgeDoubleClick}
+            deleteKeyCode={['Backspace', 'Delete']}
+            fitView
+          >
+            <Background color={theme === 'light' ? '#aaa' : '#555'} gap={20} size={1} />
+            <Controls />
+          </ReactFlow>
+        </div>
+
+        {/* ПРАВА ПАНЕЛЬ */}
+        <PropertiesPanel />
+      
       </div>
     </div>
   );

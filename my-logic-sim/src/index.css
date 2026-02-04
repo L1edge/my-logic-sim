@@ -2,11 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ФІКС ВИСОТИ, ЩОБ НЕ БУЛО БІЛОГО ЕКРАНУ ПРИ ПОМИЛЦІ TAILWIND */
-html, body, #root {
-  height: 100%;
+/* --- ГАРАНТОВАНИЙ ФІКС ВИСОТИ --- */
+html, body, #root, #app-container {
   width: 100%;
+  height: 100%;
   margin: 0;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -57,22 +58,28 @@ html, body, #root {
   z-index: -1;
 }
 
-/* --- LIQUID GLASS ТЕМА (ОПТИМІЗОВАНА) --- */
-[data-theme='glass'] {
-  --bg-color: #020617; 
-  --text-primary: #ffffff;
-  --sidebar-bg: rgba(30, 41, 59, 0.5);
-  --sidebar-border: rgba(255, 255, 255, 0.15);
+/* ========================================= */
+/* --- LIQUID GLASS THEME (STATIC BG) --- */
+/* ========================================= */
 
-  --node-input-bg: rgba(15, 23, 42, 0.65); 
-  --node-input-border: rgba(34, 197, 94, 0.6);
-  --node-input-header: rgba(34, 197, 94, 0.25);
+[data-theme='glass'] {
+  --bg-color: #050b14; 
+  --text-primary: #e2e8f0;
+  
+  /* Сайдбар: темне скло */
+  --sidebar-bg: rgba(15, 23, 42, 0.4); 
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+
+  /* Ноди: Ефект лінзи */
+  --node-input-bg: rgba(255, 255, 255, 0.03);
+  --node-input-border: rgba(255, 255, 255, 0.15);
+  --node-input-header: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
   --node-input-text: #ffffff;
   --node-input-val-color: #ffffff;
 
-  --node-output-bg: rgba(15, 23, 42, 0.65);
-  --node-output-border: rgba(249, 115, 22, 0.6);
-  --node-output-header: rgba(249, 115, 22, 0.25);
+  --node-output-bg: rgba(255, 255, 255, 0.03);
+  --node-output-border: rgba(255, 255, 255, 0.15);
+  --node-output-header: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
   --node-output-text: #ffffff;
   --node-output-val-color: #ffffff;
 }
@@ -83,35 +90,100 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* --- ОНОВЛЕНИЙ ФОН (СТАТИЧНИЙ, НЕ ЛАГАЄ) --- */
 [data-theme='glass'] .app-background {
-  background: 
-    radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.5), transparent 40%), 
-    radial-gradient(circle at 85% 30%, rgba(124, 58, 237, 0.4), transparent 40%);
   background-color: #020617;
+  
+  /* Високоякісне зображення темної рідини (Unsplash) */
+  background-image: url('https://images.unsplash.com/photo-1618005182384-4595b9c41f47?q=80&w=2070&auto=format&fit=crop');
+  
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
   position: absolute;
   inset: 0;
   z-index: -1;
+  
+  /* Відключаємо трансформації, щоб не навантажувати систему */
+  transform: none;
+}
+
+/* Гарантовано вимикаємо анімацію хвиль */
+[data-theme='glass'] .app-background::before,
+[data-theme='glass'] .app-background::after {
+   content: none;
+   display: none;
+}
+
+/* --- САЙДБАР І ЕЛЕМЕНТИ --- */
+[data-theme='glass'] aside {
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+/* ЕФЕКТ МОКРОГО СКЛА ДЛЯ КНОПОК */
+[data-theme='glass'] aside .grid > div {
+  position: relative;
+  background: linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.25); /* Блік */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);    /* Тінь */
+  box-shadow: 
+    0 4px 15px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  color: #fff;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  overflow: hidden; 
+}
+
+/* КРАПЛІ / БУЛЬБАШКИ НА КНОПКАХ */
+[data-theme='glass'] aside .grid > div::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.25;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(3px 3px at 20% 30%, rgba(255,255,255,0.9) 50%, transparent 55%),
+    radial-gradient(2px 2px at 80% 60%, rgba(255,255,255,0.8) 50%, transparent 55%),
+    radial-gradient(4px 4px at 40% 80%, rgba(255,255,255,0.6) 50%, transparent 55%),
+    radial-gradient(2px 2px at 10% 10%, rgba(255,255,255,0.7) 50%, transparent 55%),
+    radial-gradient(5px 5px at 90% 20%, rgba(255,255,255,0.2) 50%, transparent 55%);
+  filter: blur(0.5px);
+}
+
+/* Hover ефект */
+[data-theme='glass'] aside .grid > div:hover {
+  background: linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 0 20px rgba(56, 189, 248, 0.2), 
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+[data-theme='glass'] aside .grid > div:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+}
+
+/* --- СТИЛІЗАЦІЯ НОДІВ (ГЛЯНЦЕВІ БЛОКИ) --- */
+[data-theme='glass'] .react-flow__node {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 10px 30px -5px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  /* GPU прискорення для плавності */
   transform: translateZ(0); 
   will-change: transform;
-}
-
-@keyframes bg-pulse {
-  0% { transform: scale(1) translateZ(0); }
-  100% { transform: scale(1.05) translateZ(0); }
-}
-
-[data-theme='glass'] aside {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-[data-theme='glass'] .react-flow__node {
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transform: translateZ(0);
-  will-change: transform; 
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 [data-theme='glass'] .react-flow__node.react-flow__node-drag {
@@ -119,7 +191,29 @@ body {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Загальні стилі для select */
+/* Заголовки нодів */
+[data-theme='glass'] .node-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent);
+}
+
+/* З'єднання */
+[data-theme='glass'] .react-flow__edge-path {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+/* --- СТИЛІ ДЛЯ СВІТЛОЇ ТЕМИ --- */
+[data-theme='light'] aside .grid > div {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+[data-theme='light'] aside .grid > div:hover {
+  background-color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* --- ЗАГАЛЬНІ --- */
 [data-theme='glass'] select option,
 [data-theme='dark'] select option {
   background-color: #1e293b;
@@ -134,31 +228,4 @@ body {
 .react-flow__edge:hover .react-flow__edge-path {
   stroke-width: 4px !important;
   cursor: pointer;
-}
-
-.sidebar-backdrop {
-  /* Забезпечує читабельність тексту на будь-якому фоні */
-  backdrop-filter: blur(10px);
-}
-
-[data-theme='light'] aside .grid > div {
-  background-color: #f3f4f6; /* світло-сірий фон для кнопок */
-  border: 1px solid #e5e7eb;
-}
-[data-theme='light'] aside .grid > div:hover {
-  background-color: #ffffff;
-  border-color: #3b82f6;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme='glass'] aside .grid > div {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-[data-theme='glass'] aside .grid > div:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); /* Легке світіння */
-  transform: translateY(-2px);
 }

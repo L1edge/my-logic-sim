@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useStore from '../store/useStore';
 
 // === НАБІР ІКОНОК (SVG PATHS) ===
@@ -63,24 +63,52 @@ const ICONS = {
   ),
 };
 
+// --- КОМПОНЕНТ КАТЕГОРІЇ (АКОРДЕОН) ---
+const Category = ({ title, children, defaultOpen = true }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className="mb-2 border-b border-white/5 last:border-0 pb-2">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between py-2 px-1 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-all select-none group"
+      >
+        {title}
+        {/* Стрілочка анімації */}
+        <span className={`transform transition-transform duration-200 opacity-50 group-hover:opacity-100 ${isOpen ? 'rotate-0' : '-rotate-90'}`}>
+          ▼
+        </span>
+      </button>
+      
+      {/* Контент з анімацією відкриття */}
+      <div 
+        className={`grid grid-cols-2 gap-2 transition-all duration-300 ease-in-out overflow-hidden
+        ${isOpen ? 'max-h-[500px] opacity-100 pt-1' : 'max-h-0 opacity-0'}`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 // Компонент однієї кнопки інструменту
 const ToolItem = ({ type, label, icon, colorClass, onDragStart, value }) => (
   <div 
     className={`
       flex flex-col items-center justify-center p-3 rounded-lg cursor-grab transition-all duration-200
-      border border-transparent hover:border-white/20 hover:shadow-lg hover:scale-105 active:scale-95
-      bg-white/5 dark:bg-slate-800/50
-      group
+      border border-transparent hover:border-white/10 hover:shadow-lg hover:bg-white/5 active:scale-95
+      bg-white/5 dark:bg-slate-800/40 backdrop-blur-sm
+      group relative overflow-hidden
     `}
     draggable
     onDragStart={(event) => onDragStart(event, type, label, value)}
   >
-    <div className={`w-8 h-8 mb-2 transition-colors ${colorClass}`}>
-      <svg viewBox="0 0 24 24" className="w-full h-full">
+    <div className={`w-8 h-8 mb-2 transition-colors duration-300 ${colorClass}`}>
+      <svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-md">
         {icon}
       </svg>
     </div>
-    <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 group-hover:opacity-100 transition-opacity text-center">
+    <span className="text-[10px] font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100 transition-opacity text-center">
       {label}
     </span>
   </div>
@@ -100,7 +128,7 @@ export default function Sidebar() {
 
   return (
     <aside 
-      className="w-72 p-4 border-r h-screen flex flex-col gap-6 shadow-xl z-10 overflow-y-auto transition-colors duration-300 sidebar-backdrop"
+      className="w-72 p-4 border-r h-full flex flex-col gap-6 shadow-xl z-10 overflow-y-auto transition-colors duration-300 sidebar-backdrop"
       style={{ 
         backgroundColor: 'var(--sidebar-bg)', 
         borderColor: 'var(--sidebar-border)',
@@ -109,18 +137,24 @@ export default function Sidebar() {
     >
       {/* HEADER & THEME SELECTOR */}
       <div>
-        <div className="flex items-center gap-2 mb-4 px-1">
-          <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white">L</div>
-          <h2 className="font-bold text-xl tracking-tight">LogicSim</h2>
+        <div className="flex items-center gap-3 mb-5 px-1">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-blue-500/30">
+            L
+          </div>
+          <div>
+            <h2 className="font-bold text-lg leading-none tracking-tight">LogicSim</h2>
+            <span className="text-[10px] opacity-50 uppercase tracking-widest font-semibold">Professional</span>
+          </div>
         </div>
         
-        <div className="relative">
+        <div className="relative group">
           <select 
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
-            className="w-full p-2 pl-3 rounded-md border text-sm font-medium appearance-none cursor-pointer outline-none transition-all hover:bg-black/5 dark:hover:bg-white/5 focus:ring-2 focus:ring-blue-500/50"
+            className="w-full p-2 pl-3 rounded-lg border text-xs font-bold appearance-none cursor-pointer outline-none transition-all 
+            hover:bg-black/5 dark:hover:bg-white/5 focus:ring-2 focus:ring-blue-500/30"
             style={{ 
-              backgroundColor: theme === 'glass' ? 'rgba(0,0,0,0.2)' : 'var(--bg-color)', 
+              backgroundColor: theme === 'glass' ? 'rgba(0,0,0,0.1)' : 'var(--bg-color)', 
               color: 'var(--text-primary)',
               borderColor: 'var(--sidebar-border)' 
             }}
@@ -129,17 +163,18 @@ export default function Sidebar() {
             <option value="dark">🌑 Dark Theme</option>
             <option value="glass">💧 Liquid Glass</option>
           </select>
-          {/* Стрілочка для селекту */}
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+          {/* Кастомна стрілочка */}
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity text-[10px]">
             ▼
           </div>
         </div>
       </div>
       
-      {/* === SIGNALS SECTION === */}
-      <div>
-        <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 px-1">Сигнали</div>
-        <div className="grid grid-cols-2 gap-2">
+      {/* SCROLLABLE AREA */}
+      <div className="flex-1 overflow-y-auto pr-1 space-y-2">
+        
+        {/* === SIGNALS SECTION === */}
+        <Category title="Сигнали" defaultOpen={true}>
           <ToolItem 
             type="constantNode" label="GND (0)" value={0} 
             icon={ICONS.GND} onDragStart={onDragStart} 
@@ -148,15 +183,12 @@ export default function Sidebar() {
           <ToolItem 
             type="constantNode" label="VCC (1)" value={1} 
             icon={ICONS.VCC} onDragStart={onDragStart} 
-            colorClass="text-red-500 group-hover:text-red-400"
+            colorClass="text-red-500 group-hover:text-red-400 shadow-red-500/20"
           />
-        </div>
-      </div>
+        </Category>
 
-      {/* === I/O SECTION === */}
-      <div>
-        <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 px-1">Ввід / Вивід</div>
-        <div className="grid grid-cols-2 gap-2">
+        {/* === I/O SECTION === */}
+        <Category title="Ввід / Вивід" defaultOpen={true}>
           <ToolItem 
             type="inputNode" label="Switch" 
             icon={ICONS.INPUT} onDragStart={onDragStart} 
@@ -167,15 +199,10 @@ export default function Sidebar() {
             icon={ICONS.OUTPUT} onDragStart={onDragStart} 
             colorClass="text-orange-500 group-hover:text-orange-400"
           />
-        </div>
-      </div>
-      
-      <div className="border-t opacity-10" style={{ borderColor: 'var(--text-primary)' }}></div>
-
-      {/* === LOGIC GATES SECTION === */}
-      <div>
-        <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 px-1">Логічні Елементи</div>
-        <div className="grid grid-cols-2 gap-2">
+        </Category>
+        
+        {/* === LOGIC GATES SECTION === */}
+        <Category title="Логічні Елементи" defaultOpen={true}>
           <ToolItem 
             type="logicGate" label="AND" 
             icon={ICONS.AND} onDragStart={onDragStart} 
@@ -184,7 +211,7 @@ export default function Sidebar() {
           <ToolItem 
             type="logicGate" label="NAND" 
             icon={ICONS.NAND} onDragStart={onDragStart} 
-            colorClass="text-blue-700 dark:text-blue-300 group-hover:text-blue-500"
+            colorClass="text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-500"
           />
           <ToolItem 
             type="logicGate" label="OR" 
@@ -196,15 +223,15 @@ export default function Sidebar() {
             icon={ICONS.XOR} onDragStart={onDragStart} 
             colorClass="text-teal-500 group-hover:text-teal-400"
           />
-          {/* NOT зазвичай займає менше місця або можна зробити його на всю ширину, якщо він один в рядку */}
           <div className="col-span-2"> 
              <ToolItem 
-              type="logicGate" label="NOT" 
+              type="logicGate" label="NOT (Inverter)" 
               icon={ICONS.NOT} onDragStart={onDragStart} 
-              colorClass="text-red-500 group-hover:text-red-400"
+              colorClass="text-rose-500 group-hover:text-rose-400"
             />
           </div>
-        </div>
+        </Category>
+
       </div>
     </aside>
   );
