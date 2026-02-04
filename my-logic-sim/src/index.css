@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ФІКС ВИСОТИ, ЩОБ НЕ БУЛО БІЛОГО ЕКРАНУ ПРИ ПОМИЛЦІ TAILWIND */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+:root {
+  --bg-color: #f9fafb;
+  --text-primary: #111827;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e5e7eb;
+  
+  /* Світла тема */
+  --node-input-bg: #ffffff;
+  --node-input-border: #16a34a;
+  --node-input-header: #dcfce7;
+  --node-input-text: #166534;
+  --node-input-val-color: #000000;
+
+  --node-output-bg: #ffffff;
+  --node-output-border: #f97316;
+  --node-output-header: #ffedd5;
+  --node-output-text: #9a3412;
+  --node-output-val-color: #000000;
+}
+
+/* --- ТЕМНА ТЕМА --- */
+[data-theme='dark'] {
+  --bg-color: #0f172a;
+  --text-primary: #f8fafc;
+  --sidebar-bg: #1e293b;
+  --sidebar-border: #334155;
+
+  --node-input-bg: #0f172a; 
+  --node-input-border: #22c55e;
+  --node-input-header: #14532d;
+  --node-input-text: #dcfce7;
+  --node-input-val-color: #ffffff;
+
+  --node-output-bg: #0f172a;
+  --node-output-border: #f97316;
+  --node-output-header: #7c2d12;
+  --node-output-text: #ffedd5;
+  --node-output-val-color: #ffffff;
+}
+
+[data-theme='dark'] .app-background {
+  background-color: #0f172a;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+/* --- LIQUID GLASS ТЕМА (ОПТИМІЗОВАНА) --- */
+[data-theme='glass'] {
+  --bg-color: #020617; 
+  --text-primary: #ffffff;
+  --sidebar-bg: rgba(30, 41, 59, 0.5);
+  --sidebar-border: rgba(255, 255, 255, 0.15);
+
+  --node-input-bg: rgba(15, 23, 42, 0.65); 
+  --node-input-border: rgba(34, 197, 94, 0.6);
+  --node-input-header: rgba(34, 197, 94, 0.25);
+  --node-input-text: #ffffff;
+  --node-input-val-color: #ffffff;
+
+  --node-output-bg: rgba(15, 23, 42, 0.65);
+  --node-output-border: rgba(249, 115, 22, 0.6);
+  --node-output-header: rgba(249, 115, 22, 0.25);
+  --node-output-text: #ffffff;
+  --node-output-val-color: #ffffff;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme='glass'] .app-background {
+  background: 
+    radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.5), transparent 40%), 
+    radial-gradient(circle at 85% 30%, rgba(124, 58, 237, 0.4), transparent 40%);
+  background-color: #020617;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: translateZ(0); 
+  will-change: transform;
+}
+
+@keyframes bg-pulse {
+  0% { transform: scale(1) translateZ(0); }
+  100% { transform: scale(1.05) translateZ(0); }
+}
+
+[data-theme='glass'] aside {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme='glass'] .react-flow__node {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transform: translateZ(0);
+  will-change: transform; 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='glass'] .react-flow__node.react-flow__node-drag {
+  backdrop-filter: none; 
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Загальні стилі для select */
+[data-theme='glass'] select option,
+[data-theme='dark'] select option {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #3b82f6 !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+}
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke-width: 4px !important;
+  cursor: pointer;
+}
+
+.sidebar-backdrop {
+  /* Забезпечує читабельність тексту на будь-якому фоні */
+  backdrop-filter: blur(10px);
+}
+
+[data-theme='light'] aside .grid > div {
+  background-color: #f3f4f6; /* світло-сірий фон для кнопок */
+  border: 1px solid #e5e7eb;
+}
+[data-theme='light'] aside .grid > div:hover {
+  background-color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='glass'] aside .grid > div {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+[data-theme='glass'] aside .grid > div:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); /* Легке світіння */
+  transform: translateY(-2px);
+}
