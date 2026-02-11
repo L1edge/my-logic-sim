@@ -5,7 +5,6 @@ import useStore from '../../store/useStore';
 export default memo(function CustomScriptNode({ id, data, selected }) {
   const { customModules } = useStore();
   
-  // Шукаємо дані нашого модуля в сторі за його ID
   const mod = customModules[data.moduleId];
 
   if (!mod) {
@@ -16,29 +15,43 @@ export default memo(function CustomScriptNode({ id, data, selected }) {
     );
   }
 
-  // Вираховуємо динамічну висоту (щоб влізли всі порти)
+  // === 1. ВИТЯГУЄМО ДИНАМІЧНУ ВИСОТУ (трохи збільшили відстані) ===
   const maxPorts = Math.max(mod.inputs.length, mod.outputs.length);
-  const baseHeight = 40;
-  const portSpacing = 20;
+  const baseHeight = 60; 
+  const portSpacing = 24; 
   const dynamicHeight = Math.max(baseHeight, maxPorts * portSpacing + 20);
+
+  // === 2. ЩЕДРА МАТЕМАТИКА ДЛЯ ШИРИНИ ===
+  const maxInLen = mod.inputs.reduce((max, str) => Math.max(max, str.length), 0);
+  const maxOutLen = mod.outputs.reduce((max, str) => Math.max(max, str.length), 0);
+  const titleLen = mod.name.length;
+
+  // Виділяємо по 8px на кожну літеру порту + залізно 120px порожнечі по центру!
+  const requiredWidthForPorts = (maxInLen * 8) + (maxOutLen * 8) + 120; 
+  
+  // Виділяємо по 11px на кожну велику літеру заголовка + 60px країв
+  const requiredWidthForTitle = (titleLen * 11) + 60; 
+
+  // Беремо найбільше, але ставимо мінімум 160px
+  const dynamicWidth = Math.max(160, requiredWidthForPorts, requiredWidthForTitle);
 
   return (
     <div 
-      className={`relative rounded-lg shadow-lg border-2 transition-all duration-300 backdrop-blur-md flex items-center justify-center
+      className={`relative rounded-xl shadow-xl border-2 transition-all duration-300 backdrop-blur-md flex flex-col items-center justify-center
       ${selected ? 'ring-2 ring-blue-500 ring-offset-2 border-yellow-400' : 'border-white/20'}`}
       style={{ 
-        width: 120, 
+        width: dynamicWidth, 
         height: dynamicHeight,
-        background: 'linear-gradient(145deg, rgba(20, 30, 50, 0.9) 0%, rgba(10, 15, 30, 0.95) 100%)',
+        background: 'linear-gradient(145deg, rgba(20, 30, 50, 0.95) 0%, rgba(10, 15, 30, 0.98) 100%)',
         color: '#fff'
       }}
     >
       {/* Назва модуля по центру */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-        <span className="text-xs font-black tracking-widest text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">
+        <span className="text-xs font-black tracking-widest text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)] whitespace-nowrap px-4">
           {mod.name}
         </span>
-        <span className="text-[8px] uppercase opacity-50 mt-1">Custom logic</span>
+        <span className="text-[8px] uppercase opacity-40 mt-1 whitespace-nowrap">Custom logic</span>
       </div>
 
       {/* === ВХОДИ (ЗЛІВА) === */}
@@ -49,12 +62,12 @@ export default memo(function CustomScriptNode({ id, data, selected }) {
             <Handle
               type="target"
               position={Position.Left}
-              id={`input-${index}`} // ВАЖЛИВО: logic.js чекає саме "input-0", "input-1"
+              id={`input-${index}`}
               className="!w-3 !h-3 !bg-gray-400 !border-2 !border-white hover:!bg-green-400 z-50"
               style={{ top: topPos, left: -6 }}
             />
-            {/* Підпис порту */}
-            <span className="absolute text-[8px] font-mono opacity-70" style={{ top: `calc(${topPos} - 6px)`, left: 6 }}>
+            {/* Підпис порту відсунуто на 12px від краю */}
+            <span className="absolute text-[9px] font-mono opacity-80 whitespace-nowrap" style={{ top: `calc(${topPos} - 6px)`, left: 12 }}>
               {inputName}
             </span>
           </div>
@@ -64,11 +77,8 @@ export default memo(function CustomScriptNode({ id, data, selected }) {
       {/* === ВИХОДИ (СПРАВА) === */}
       {mod.outputs.map((outputName, index) => {
         const topPos = `${(100 / (mod.outputs.length + 1)) * (index + 1)}%`;
-        // Отримуємо поточне значення з value об'єкта (якщо воно є)
-        // Оскільки у нас може бути кілька виходів, ми будемо зберігати їх як об'єкт: data.value = { Res: 0, Zero: 1 }
         const outVal = (data.value && typeof data.value === 'object') ? data.value[outputName] : null;
         
-        // Колір порту залежить від значення (якщо є сигнал)
         const handleColor = outVal > 0 ? '!bg-green-500 !border-green-200' : (outVal === 0 ? '!bg-red-500 !border-red-200' : '!bg-gray-400');
 
         return (
@@ -76,12 +86,12 @@ export default memo(function CustomScriptNode({ id, data, selected }) {
             <Handle
               type="source"
               position={Position.Right}
-              id={`output-${outputName}`} // Для виходів називаємо по імені
+              id={`output-${outputName}`}
               className={`!w-3 !h-3 !border-2 !border-white z-50 ${handleColor}`}
               style={{ top: topPos, right: -6 }}
             />
-            {/* Підпис порту */}
-            <span className="absolute text-[8px] font-mono opacity-70 text-right" style={{ top: `calc(${topPos} - 6px)`, right: 6 }}>
+            {/* Підпис порту відсунуто на 12px від краю */}
+            <span className="absolute text-[9px] font-mono opacity-80 whitespace-nowrap text-right" style={{ top: `calc(${topPos} - 6px)`, right: 12 }}>
               {outputName}
             </span>
           </div>

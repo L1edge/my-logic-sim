@@ -21,18 +21,22 @@ const useStore = create(
       theme: 'dark',
       setTheme: (theme) => set({ theme }),
 
-      // === КАСТОМНІ МОДУЛІ (ТУТ БУЛА ПРОБЛЕМА, ТЕПЕР ВОНА ВИРІШЕНА) ===
-      customModules: {},
-      isCustomModalOpen: false,
-      setCustomModalOpen: (isOpen) => set({ isCustomModalOpen: isOpen }),
-      saveCustomModule: (moduleData) => set(state => ({
-          customModules: { ...state.customModules, [moduleData.id]: moduleData }
-      })),
-      deleteCustomModule: (id) => set(state => {
-          const newMods = { ...state.customModules };
-          delete newMods[id];
-          return { customModules: newMods };
-      }),
+    // === КАСТОМНІ МОДУЛІ ===
+          customModules: {},
+          isCustomModalOpen: false,
+          editingModuleId: null, // <--- ДОДАЛИ: ID модуля, який ми зараз редагуємо
+          
+          setEditingModuleId: (id) => set({ editingModuleId: id }), // <--- ДОДАЛИ
+          setCustomModalOpen: (isOpen) => set({ isCustomModalOpen: isOpen }),
+          
+          saveCustomModule: (moduleData) => set(state => ({
+              customModules: { ...state.customModules, [moduleData.id]: moduleData }
+          })),
+          deleteCustomModule: (id) => set(state => {
+              const newMods = { ...state.customModules };
+              delete newMods[id];
+              return { customModules: newMods };
+          }),
       // ================================================================
 
       createNewProject: () => {

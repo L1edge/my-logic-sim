@@ -12,10 +12,10 @@ export default function Toolbar() {
       return <div className="h-12 border-b flex items-center px-4 bg-red-900 text-white">Store Error</div>;
   }
 
-  const { 
+const { 
     projects, activeProjectId, createNewProject, setActiveProject, closeProject, renameProject,
     loadGraph, startSimulation, stopSimulation, stepSimulation, isRunning,
-    setCustomModalOpen // <--- 1. ДІСТАЛИ ФУНКЦІЮ ДЛЯ ВІКНА
+    setCustomModalOpen, setEditingModuleId 
   } = store;
   
   const fileInputRef = useRef(null);
@@ -135,7 +135,7 @@ export default function Toolbar() {
              
              {/* 2. ДОДАТИ КНОПКУ ОСЬ ТУТ */}
              <div className="w-px h-5 bg-gray-500/30 mx-1"></div> {/* Розділювач */}
-             <button onClick={() => setCustomModalOpen(true)} className="px-3 py-1 text-xs font-bold border border-blue-500/50 text-blue-500 rounded hover:bg-blue-500/10 transition flex items-center gap-2 shadow-sm">
+                <button onClick={() => { setEditingModuleId(null); setCustomModalOpen(true); }} className="px-3 py-1 text-xs font-bold border border-blue-500/50 text-blue-500 rounded hover:bg-blue-500/10 transition flex items-center gap-2 shadow-sm">
                NEW CUSTOM BLOCK
              </button>
           </div>

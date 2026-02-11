@@ -21,24 +21,40 @@ const Category = ({ title, children, defaultOpen = true }) => {
       <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between py-2 px-1 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-all select-none group">
         {title} <span className={`transform transition-transform duration-200 opacity-50 group-hover:opacity-100 ${isOpen ? 'rotate-0' : '-rotate-90'}`}>▼</span>
       </button>
-      <div className={`grid grid-cols-2 gap-2 transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100 pt-1' : 'max-h-0 opacity-0'}`}>{children}</div>
+      <div className={`grid grid-cols-2 gap-2 transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[5000px] opacity-100 pt-1' : 'max-h-0 opacity-0'}`}>{children}</div>
     </div>
   );
 };
 
-const ToolItem = ({ type, label, icon, colorClass, onDragStart, value }) => (
+// ДОДАЛИ onDoubleClick та onDelete
+const ToolItem = ({ type, label, icon, colorClass, onDragStart, value, onDoubleClick, onDelete }) => (
   <div 
     className={`flex flex-col items-center justify-center p-3 rounded-lg cursor-grab transition-all duration-200 border border-transparent hover:border-white/10 hover:shadow-lg hover:bg-white/5 active:scale-95 bg-white/5 dark:bg-slate-800/40 backdrop-blur-sm group relative overflow-hidden`}
     draggable
     onDragStart={(event) => onDragStart(event, type, label, value)}
+    onDoubleClick={onDoubleClick} // <--- Дабл-клік для редагування
   >
+    {/* ІКОНКА ВИДАЛЕННЯ (з'являється при наведенні) */}
+    {onDelete && (
+      <div 
+        onClick={(e) => { e.stopPropagation(); onDelete(value); }}
+        className="absolute top-1 right-1 p-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-500/20 rounded cursor-pointer transition-all z-20"
+        title="Видалити модуль"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </div>
+    )}
+
     <div className={`w-8 h-8 mb-2 transition-colors duration-300 ${colorClass}`}><svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-md">{icon}</svg></div>
     <span className="text-[10px] font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100 transition-opacity text-center truncate w-full">{label}</span>
   </div>
 );
 
 export default function Sidebar() {
-  const { theme, setTheme, customModules = {} } = useStore(); 
+  const { theme, setTheme, customModules = {}, deleteCustomModule, setEditingModuleId, setCustomModalOpen } = useStore(); 
   
   const onDragStart = (event, nodeType, label, value) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
@@ -81,15 +97,10 @@ export default function Sidebar() {
           <ToolItem type="logicGate" label="OR" icon={ICONS.OR} onDragStart={onDragStart} colorClass="text-purple-500 group-hover:text-purple-400" />
           <ToolItem type="logicGate" label="XOR" icon={ICONS.XOR} onDragStart={onDragStart} colorClass="text-teal-500 group-hover:text-teal-400" />
           <div className="col-span-2"> 
-             <ToolItem 
-              type="logicGate" label="NOT" 
-              icon={ICONS.NOT} onDragStart={onDragStart} 
-              colorClass="text-rose-500 group-hover:text-rose-400"
-            />
+             <ToolItem type="logicGate" label="NOT" icon={ICONS.NOT} onDragStart={onDragStart} colorClass="text-rose-500 group-hover:text-rose-400" />
           </div>
         </Category>
 
-        {/* НОВА КАТЕГОРІЯ З ФІКСОМ ПЕРЕТЯГУВАННЯ */}
         {Object.keys(customModules).length > 0 && (
           <Category title="Мої Модулі" defaultOpen={true}>
             {Object.values(customModules).map(mod => (
@@ -100,7 +111,19 @@ export default function Sidebar() {
                 value={mod.id} 
                 icon={ICONS.CUSTOM} 
                 colorClass="text-yellow-400 group-hover:text-yellow-300 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]" 
-                onDragStart={onDragStart} /* ОСЬ ТОЙ САМИЙ ФІКС, ЯКИЙ ЛАМАВ ПЕРЕТЯГУВАННЯ */
+                onDragStart={onDragStart}
+                
+                // === МАГІЯ ТУТ: Дабл-клік та Видалення ===
+                onDoubleClick={() => {
+                   setEditingModuleId(mod.id);
+                   setCustomModalOpen(true);
+                }}
+                onDelete={() => {
+                   // Запитуємо підтвердження, щоб випадково не видалити
+                   if(window.confirm(`Ви дійсно хочете видалити модуль "${mod.name}"?`)) {
+                       deleteCustomModule(mod.id);
+                   }
+                }}
               />
             ))}
           </Category>
