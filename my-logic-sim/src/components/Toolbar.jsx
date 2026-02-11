@@ -151,18 +151,35 @@ const {
           <button onClick={stepSimulation} disabled={isRunning} className="px-3 py-1 text-xs font-bold text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10 disabled:opacity-30 disabled:cursor-not-allowed">⏯ STEP</button>
         </div>
 
-        {/* EXPORT MENU */}
-        <div className="relative">
-            <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-1 text-xs font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500 flex items-center gap-2">Export HDL ▼</button>
-            {showExportMenu && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded shadow-xl overflow-hidden z-50">
-                    <button onClick={() => handleExport('verilog')} className="block w-full text-left px-4 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/10 dark:text-gray-200">Verilog (.v)</button>
-                    <button onClick={() => handleExport('vhdl')} className="block w-full text-left px-4 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/10 dark:text-gray-200">VHDL (.vhd)</button>
-                    <div className="border-t dark:border-white/10 my-1"></div>
-                    <button onClick={() => handleExport('testbench')} className="block w-full text-left px-4 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/10 text-green-600 font-bold">Generate Testbench</button>
-                </div>
-            )}
-        </div>
+          {/* EXPORT MENU */}
+            <div className="relative">
+                <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-1 text-xs font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500 transition-colors flex items-center gap-2 shadow-sm">
+                    Export HDL ▼
+                </button>
+                {showExportMenu && (
+                    <div 
+                        className="absolute right-0 top-full mt-2 w-48 border rounded-lg shadow-2xl overflow-hidden z-50 backdrop-blur-md"
+                        style={{ 
+                            backgroundColor: 'var(--sidebar-bg)', 
+                            borderColor: 'var(--sidebar-border)', 
+                            color: 'var(--text-primary)' 
+                        }}
+                    >
+                        <button onClick={() => { handleExport('verilog'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10">
+                            Verilog (.v)
+                        </button>
+                        <button onClick={() => { handleExport('vhdl'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10">
+                            VHDL (.vhd)
+                        </button>
+                        
+                        <div className="border-t my-1" style={{ borderColor: 'var(--sidebar-border)' }}></div>
+                        
+                        <button onClick={() => { handleExport('testbench'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10 font-bold text-green-500 drop-shadow-[0_0_2px_rgba(34,197,94,0.3)]">
+                            Generate Testbench
+                        </button>
+                    </div>
+                )}
+            </div>
       </div>
       
       {/* TABS */}
