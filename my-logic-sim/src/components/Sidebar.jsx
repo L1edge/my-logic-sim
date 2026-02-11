@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import useStore from '../store/useStore';
 
-// ... (ICONS залишаємо ті самі, код скорочено для зручності) ...
-// Якщо треба, я скину повний ICONS, але там змін немає.
-
 const ICONS = {
   GND: (<g stroke="currentColor" strokeWidth="2" fill="none"><path d="M12 4V14M4 14H20M7 18H17M10 22H14" /></g>),
   VCC: (<g stroke="currentColor" strokeWidth="2" fill="none"><circle cx="12" cy="12" r="9" /><path d="M12 7V17M7 12H17" /></g>),
@@ -14,6 +11,7 @@ const ICONS = {
   OR: (<path d="M4 5C4 5 9 12 4 19C10 19 15 19 19 12C15 5 10 5 4 5Z" stroke="currentColor" strokeWidth="2" fill="none"/>),
   XOR: (<g stroke="currentColor" strokeWidth="2" fill="none"><path d="M7 5C7 5 12 12 7 19C13 19 18 19 22 12C18 5 13 5 7 5Z" /><path d="M3 5C3 5 8 12 3 19" /></g>),
   NOT: (<g stroke="currentColor" strokeWidth="2" fill="none"><path d="M4 5V19L16 12L4 5Z" /><circle cx="19" cy="12" r="2" /></g>),
+  CUSTOM: (<g stroke="currentColor" strokeWidth="2" fill="none"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M8 10L12 14L16 10" /></g>)
 };
 
 const Category = ({ title, children, defaultOpen = true }) => {
@@ -35,12 +33,13 @@ const ToolItem = ({ type, label, icon, colorClass, onDragStart, value }) => (
     onDragStart={(event) => onDragStart(event, type, label, value)}
   >
     <div className={`w-8 h-8 mb-2 transition-colors duration-300 ${colorClass}`}><svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-md">{icon}</svg></div>
-    <span className="text-[10px] font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100 transition-opacity text-center">{label}</span>
+    <span className="text-[10px] font-bold uppercase tracking-wider opacity-60 group-hover:opacity-100 transition-opacity text-center truncate w-full">{label}</span>
   </div>
 );
 
 export default function Sidebar() {
-  const { theme, setTheme } = useStore();
+  const { theme, setTheme, customModules = {} } = useStore(); 
+  
   const onDragStart = (event, nodeType, label, value) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.setData('label', label);
@@ -50,11 +49,10 @@ export default function Sidebar() {
 
   return (
     <aside className="w-72 p-4 border-r h-full flex flex-col gap-6 shadow-xl z-10 overflow-y-auto transition-colors duration-300 sidebar-backdrop" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}>
-      {/* Header code same as before... */}
       <div>
         <div className="flex items-center gap-3 mb-5 px-1">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-blue-500/30">L</div>
-          <div><h2 className="font-bold text-lg leading-none tracking-tight">LogicSim</h2><span className="text-[10px] opacity-50 uppercase tracking-widest font-semibold">Professional</span></div>
+          <div><h2 className="font-bold text-lg leading-none tracking-tight">LogicSim</h2></div>
         </div>
         <div className="relative group">
           <select value={theme} onChange={(e) => setTheme(e.target.value)} className="w-full p-2 pl-3 rounded-lg border text-xs font-bold appearance-none cursor-pointer outline-none transition-all hover:bg-black/5 dark:hover:bg-white/5 focus:ring-2 focus:ring-blue-500/30" style={{ backgroundColor: theme === 'glass' ? 'rgba(0,0,0,0.1)' : 'var(--bg-color)', color: 'var(--text-primary)', borderColor: 'var(--sidebar-border)' }}>
@@ -83,7 +81,6 @@ export default function Sidebar() {
           <ToolItem type="logicGate" label="OR" icon={ICONS.OR} onDragStart={onDragStart} colorClass="text-purple-500 group-hover:text-purple-400" />
           <ToolItem type="logicGate" label="XOR" icon={ICONS.XOR} onDragStart={onDragStart} colorClass="text-teal-500 group-hover:text-teal-400" />
           <div className="col-span-2"> 
-             {/* ОСЬ ТУТ ЗМІНИЛИ НАЗВУ НА ПРОСТО "NOT" */}
              <ToolItem 
               type="logicGate" label="NOT" 
               icon={ICONS.NOT} onDragStart={onDragStart} 
@@ -91,6 +88,24 @@ export default function Sidebar() {
             />
           </div>
         </Category>
+
+        {/* НОВА КАТЕГОРІЯ З ФІКСОМ ПЕРЕТЯГУВАННЯ */}
+        {Object.keys(customModules).length > 0 && (
+          <Category title="Мої Модулі" defaultOpen={true}>
+            {Object.values(customModules).map(mod => (
+              <ToolItem 
+                key={mod.id}
+                type="customScriptNode" 
+                label={mod.name} 
+                value={mod.id} 
+                icon={ICONS.CUSTOM} 
+                colorClass="text-yellow-400 group-hover:text-yellow-300 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]" 
+                onDragStart={onDragStart} /* ОСЬ ТОЙ САМИЙ ФІКС, ЯКИЙ ЛАМАВ ПЕРЕТЯГУВАННЯ */
+              />
+            ))}
+          </Category>
+        )}
+        
       </div>
     </aside>
   );

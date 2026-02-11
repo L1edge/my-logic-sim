@@ -27,19 +27,36 @@ export default function PropertiesPanel() {
   const incomingEdges = edges.filter(e => e.target === selectedNode.id);
   const inputDebug = incomingEdges.map((edge, i) => {
     const sourceNode = nodes.find(n => n.id === edge.source);
-    const val = sourceNode?.data?.value ?? 'null';
+    
+    // === ФІКС ДЛЯ DEBUG INFO: Якщо джерело сигналу - це об'єкт (кастомний модуль) ===
+    let val = sourceNode?.data?.value ?? 'null';
+    if (typeof val === 'object' && val !== null && edge.sourceHandle) {
+        // sourceHandle має вигляд "output-Res", відрізаємо префікс:
+        const outPinName = edge.sourceHandle.replace('output-', '');
+        val = val[outPinName] ?? 'null';
+    } else if (typeof val === 'object') {
+        val = 'OBJ'; // На всякий випадок
+    }
+
     return { pin: edge.targetHandle || `in-${i}`, val };
   });
+
   const outputValue = selectedNode.data.value;
 
-  // === ВИЗНАЧЕННЯ ТИПУ ===
+  // === ГОЛОВНИЙ ФІКС ПАДІННЯ: Якщо output - об'єкт, робимо з нього текст ===
+  let displayOutput = 'NULL';
+  if (outputValue !== null && outputValue !== undefined) {
+    if (typeof outputValue === 'object') {
+        displayOutput = Object.entries(outputValue).map(([k, v]) => `${k}:${v}`).join(', ');
+        if (displayOutput === '') displayOutput = '{}';
+    } else {
+        displayOutput = String(outputValue);
+    }
+  }
+
   // Очищаємо назву від сміття типу (Inverter)
   let rawType = selectedNode.type === 'logicGate' ? selectedNode.data.type : selectedNode.type;
-  
-  // Якщо десь залишився старий "Inverter", прибираємо його для відображення
   let displayType = rawType.replace('(Inverter)', '').trim();
-  
-  // Для логічної перевірки: якщо це NOT, ми його запам'ятовуємо
   const isNotGate = displayType === 'NOT' || rawType.includes('NOT');
 
   return (
@@ -71,7 +88,7 @@ export default function PropertiesPanel() {
             </div>
         </div>
 
-        {/* --- ВИБІР ВХОДІВ (ПРИХОВАНО ДЛЯ NOT) --- */}
+        {/* --- ВИБІР ВХОДІВ (ПРИХОВАНО ДЛЯ NOT ТА CUSTOM) --- */}
         {selectedNode.type === 'logicGate' && !isNotGate && (
           <div>
             <label className="text-[10px] font-bold uppercase opacity-70 mb-1 block">Inputs</label>
@@ -94,14 +111,14 @@ export default function PropertiesPanel() {
                 inputDebug.map((info, idx) => (
                   <div key={idx} className="flex justify-between items-center text-xs">
                     <span className="opacity-70 font-mono">{info.pin}</span>
-                    <span className={`font-bold font-mono ${info.val === 1 ? 'text-green-500' : info.val === 0 ? 'text-red-500' : 'text-gray-400'}`}>{info.val === null ? 'NULL' : info.val}</span>
+                    <span className={`font-bold font-mono ${info.val > 0 ? 'text-green-500' : info.val === 0 ? 'text-red-500' : 'text-gray-400'}`}>{info.val === null ? 'NULL' : info.val}</span>
                   </div>
                 ))
               ) : (<div className="text-xs opacity-40 italic">No connections</div>)}
               <div className="border-t border-white/10 my-2"></div>
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold">OUTPUT</span>
-                <span className={`font-bold font-mono text-sm ${outputValue === 1 ? 'text-green-500' : outputValue === 0 ? 'text-red-500' : 'text-gray-400'}`}>{outputValue === null ? 'NULL' : outputValue}</span>
+                <span className={`font-bold font-mono text-[10px] ${displayOutput !== 'NULL' ? 'text-blue-400' : 'text-gray-400'}`}>{displayOutput}</span>
               </div>
             </div>
         </div>

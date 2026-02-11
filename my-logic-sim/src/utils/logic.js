@@ -1,100 +1,137 @@
-// МАСКА (8 біт)
-const BIT_MASK = 0xFF; 
-
-export const evaluateCircuit = (nodes, edges) => {
-  const values = {};
+// Допоміжна функція: дістає значення з правильного піну
+const getWireValue = (edge, values) => {
+  if (!edge) return null;
+  let val = values[edge.source];
+  if (val === null || val === undefined) return null;
   
-  // 1. Ініціалізація: ВСІ вузли спочатку NULL (плаваючий стан/обрив)
-  nodes.forEach(node => {
-    values[node.id] = null;
-  });
+  // Якщо джерело - це наш кастомний модуль, його value це об'єкт { S: 25, Cout: 1 }
+  if (typeof val === 'object' && edge.sourceHandle) {
+    const pinName = edge.sourceHandle.replace('output-', '');
+    val = val[pinName];
+  }
+  return val === undefined ? null : val;
+};
 
-  // 2. Заповнюємо джерела (Input та Constant)
+export const evaluateCircuit = (nodes, edges, customModules = {}) => { // <--- ДОДАЛИ ТРЕТІЙ АРГУМЕНТ
+  const values = {};
+
+  nodes.forEach(node => { values[node.id] = null; });
+
   nodes.forEach(node => {
     if (node.type === 'inputNode' || node.type === 'constantNode') {
-      // Якщо value визначено, записуємо його. Якщо ні - null.
-      // Важливо: 0 - це валідне значення!
       if (node.data.value !== undefined && node.data.value !== null) {
-        values[node.id] = Number(node.data.value) & BIT_MASK;
+        values[node.id] = Number(node.data.value) >>> 0; 
       }
     }
   });
 
   const maxIterations = nodes.length + 1; 
-  
+
   for (let i = 0; i < maxIterations; i++) {
     let changed = false;
 
     nodes.forEach(node => {
+      
+      // === 1. ЗВИЧАЙНІ ГЕЙТИ ===
       if (node.type === 'logicGate') {
         const inputEdges = edges.filter(e => e.target === node.id);
         const inputCount = node.data.inputs || 2;
-        
-        // Збираємо значення. Якщо хоч один вхід NULL (обрив), результат може бути ненадійним.
-        // Для симулятора: якщо дріт не підключений, вважаємо його 0, АЛЕ...
-        // Щоб було гарно, ми перевіряємо, чи підключені дроти.
-        
         const inputValues = [];
-        let isConnected = true; // Чи всі потрібні порти підключені?
-
+        
         for (let j = 0; j < inputCount; j++) {
           const edge = inputEdges.find(e => e.targetHandle === `input-${j}`);
-          if (edge && values[edge.source] !== null) {
-            inputValues.push(values[edge.source]);
-          } else {
-            // Якщо пін висить у повітрі, в реальності це "антена", тут вважаємо 0, 
-            // але результат операції буде "валідним" 0.
-            inputValues.push(0); 
-            // isConnected = false; // Можна розкоментувати, якщо хочеш щоб гейт "гас" при обриві
-          }
+          const val = getWireValue(edge, values);
+          inputValues.push(val !== null ? val : 0);
         }
 
         let result = 0;
         const type = node.data.type;
         const firstVal = inputValues[0];
+        const bitLen = firstVal === 0 ? 1 : firstVal.toString(2).length;
+        const mask = (Math.pow(2, bitLen) - 1) >>> 0;
 
-        // Логіка
         if (type === 'NOT') {
-          let bits = firstVal.toString(2).length || 1;
-          let mask = (1 << bits) - 1;
-          result = (~firstVal) & mask;
+          result = (~firstVal & mask) >>> 0;
         } else {
           let acc = firstVal;
           for (let k = 1; k < inputValues.length; k++) {
             const val = inputValues[k];
             switch (type) {
               case 'AND': case 'NAND': acc = acc & val; break;
-              case 'OR':  acc = acc | val; break;
+              case 'OR':  case 'NOR':  acc = acc | val; break;
               case 'XOR': acc = acc ^ val; break;
               default: break;
             }
           }
-          result = acc;
+          result = acc >>> 0;
 
-          if (type === 'NAND') {
-             let bits = result.toString(2).length || 1;
-             let mask = (1 << bits) - 1;
-             result = (~result) & mask;
+          if (type === 'NAND' || type === 'NOR') {
+             const resLen = result === 0 ? 1 : result.toString(2).length;
+             const finalLen = Math.max(bitLen, resLen); 
+             const finalMask = (Math.pow(2, finalLen) - 1) >>> 0;
+             result = (~result & finalMask) >>> 0;
           }
         }
 
-        // Записуємо результат. Тепер це точно число (навіть 0), а не null.
         if (values[node.id] !== result) {
           values[node.id] = result;
           changed = true;
         }
       } 
       
+      // === 2. НАШІ КАСТОМНІ СКРИПТОВІ МОДУЛІ (МАГІЯ ТУТ) ===
+      else if (node.type === 'customScriptNode') {
+         const mod = customModules[node.data.moduleId];
+         if (!mod) return; // Якщо модуль видалили з пам'яті
+         
+         // 1. Збираємо значення на входах
+         const inputValues = {};
+         mod.inputs.forEach((inName, idx) => {
+             const edge = edges.find(e => e.target === node.id && e.targetHandle === `input-${idx}`);
+             const val = getWireValue(edge, values);
+             inputValues[inName] = val !== null ? val : 0;
+         });
+         
+         const outputValues = {};
+         
+         // 2. ВАЖЛИВО: ВИКОНУЄМО КОД
+         try {
+             const func = new Function('inputs', 'outputs', mod.code);
+             func(inputValues, outputValues);
+         } catch (err) {
+             console.error(`Error in Custom Module "${mod.name}":`, err);
+         }
+         
+         // 3. Записуємо результат в об'єкт
+         const prevValue = values[node.id] || {};
+         const newValue = {};
+         let changedThisNode = false;
+         
+         mod.outputs.forEach(outName => {
+             let res = outputValues[outName];
+             if (res === undefined || res === null || isNaN(res)) res = 0; // Захист від битого коду
+             newValue[outName] = res >>> 0;
+             if (newValue[outName] !== prevValue[outName]) changedThisNode = true;
+         });
+         
+         if (changedThisNode) {
+             values[node.id] = newValue;
+             changed = true;
+         }
+      }
+
+      // === 3. ДИСПЛЕЇ (OUTPUT NODE) ===
       else if (node.type === 'outputNode') {
-        const inputEdge = edges.find(e => e.target === node.id);
-        if (inputEdge && values[inputEdge.source] !== null) {
-          const sourceVal = values[inputEdge.source];
+        const edge = edges.find(e => e.target === node.id);
+        const val = getWireValue(edge, values);
+        
+        if (val !== null) {
+          const sourceVal = val >>> 0;
           if (values[node.id] !== sourceVal) {
             values[node.id] = sourceVal;
             changed = true;
           }
         } else {
-          // Якщо обрив - ставимо null (або 0, але null дозволить погасити дисплей)
           if (values[node.id] !== 0) {
             values[node.id] = 0;
             changed = true;
@@ -106,40 +143,20 @@ export const evaluateCircuit = (nodes, edges) => {
     if (!changed) break; 
   }
 
-  // Оновлення нодів
-  const updatedNodes = nodes.map(node => ({
-    ...node,
-    data: { ...node.data, value: values[node.id] }
-  }));
+  const updatedNodes = nodes.map(node => ({ ...node, data: { ...node.data, value: values[node.id] } }));
 
-  // === ОНОВЛЕННЯ ДРОТІВ (НОВА ЛОГІКА КОЛЬОРІВ) ===
   const updatedEdges = edges.map(edge => {
-    const sourceVal = values[edge.source];
-    
-    // Перевіряємо стани
-    const isFloating = sourceVal === null;
+    const sourceVal = getWireValue(edge, values);
     const isHigh = sourceVal > 0;
-    const isLow = sourceVal === 0; // Це тепер АКТИВНИЙ стан!
+    const isLow = sourceVal === 0;
 
-    let strokeColor = '#555'; // За замовчуванням (Floating/Null) - сірий
+    let strokeColor = '#555'; 
     let strokeWidth = 2;
 
-    if (isHigh) {
-      strokeColor = '#22c55e'; // Зелений (1)
-      strokeWidth = 3;
-    } else if (isLow) {
-      strokeColor = '#ef4444'; // Червоний (0) - АКТИВНИЙ НУЛЬ
-      strokeWidth = 3;         // Такий же товстий, як і High
-    }
+    if (isHigh) { strokeColor = '#22c55e'; strokeWidth = 3; } 
+    else if (isLow) { strokeColor = '#ef4444'; strokeWidth = 3; }
 
-    return {
-      ...edge,
-      animated: isHigh, // Анімація біжить тільки для 1 (струм тече)
-      style: { 
-        stroke: strokeColor, 
-        strokeWidth: strokeWidth
-      },
-    };
+    return { ...edge, animated: isHigh, style: { stroke: strokeColor, strokeWidth: strokeWidth } };
   });
 
   return { updatedNodes, updatedEdges };

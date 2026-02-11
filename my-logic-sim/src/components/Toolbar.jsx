@@ -3,7 +3,7 @@ import useStore from '../store/useStore';
 
 // Переконайся, що ці файли існують і в них є потрібні функції
 import { generateVerilog, generateVHDL, generateTestbench } from '../utils/hdl-generator';
-import { parseVerilogToGraph, parseVHDLToGraph } from '../utils/hdl-parser'; // <--- ДОДАЛИ parseVHDLToGraph
+import { parseVerilogToGraph, parseVHDLToGraph } from '../utils/hdl-parser'; 
 
 export default function Toolbar() {
   const store = useStore();
@@ -14,7 +14,8 @@ export default function Toolbar() {
 
   const { 
     projects, activeProjectId, createNewProject, setActiveProject, closeProject, renameProject,
-    loadGraph, startSimulation, stopSimulation, stepSimulation, isRunning 
+    loadGraph, startSimulation, stopSimulation, stepSimulation, isRunning,
+    setCustomModalOpen // <--- 1. ДІСТАЛИ ФУНКЦІЮ ДЛЯ ВІКНА
   } = store;
   
   const fileInputRef = useRef(null);
@@ -120,7 +121,7 @@ export default function Toolbar() {
       {/* INPUT ДЛЯ ВСІХ ТИПІВ */}
       <input 
         type="file" ref={fileInputRef} style={{ display: 'none' }} 
-        accept=".json,.v,.sv,.vhd,.vhdl" // <--- ДОДАЛИ .vhd
+        accept=".json,.v,.sv,.vhd,.vhdl"
         onChange={handleFileChange} 
       />
 
@@ -128,9 +129,15 @@ export default function Toolbar() {
       <div className="h-12 flex items-center px-4 justify-between shadow-sm z-20">
         <div className="flex items-center gap-4">
           <h1 className="font-bold text-lg tracking-tight text-blue-500">LogicSim <span className="text-[10px] text-gray-500">PRO</span></h1>
-          <div className="flex gap-1">
+          <div className="flex gap-1 items-center">
              <button onClick={handleSave} className="px-3 py-1 text-xs font-bold border rounded hover:bg-white/10 transition flex items-center gap-2" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}>💾 SAVE</button>
              <button onClick={handleOpenClick} className="px-3 py-1 text-xs font-bold border rounded hover:bg-white/10 transition flex items-center gap-2" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}>📂 OPEN</button>
+             
+             {/* 2. ДОДАТИ КНОПКУ ОСЬ ТУТ */}
+             <div className="w-px h-5 bg-gray-500/30 mx-1"></div> {/* Розділювач */}
+             <button onClick={() => setCustomModalOpen(true)} className="px-3 py-1 text-xs font-bold border border-blue-500/50 text-blue-500 rounded hover:bg-blue-500/10 transition flex items-center gap-2 shadow-sm">
+               NEW CUSTOM BLOCK
+             </button>
           </div>
         </div>
 
@@ -141,7 +148,6 @@ export default function Toolbar() {
           ) : (
              <button onClick={stopSimulation} className="px-4 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded transition animate-pulse">⏹ STOP</button>
           )}
-          {/* STEP ЗАПУСКАЄ НОВУ ЛОГІКУ З useStore */}
           <button onClick={stepSimulation} disabled={isRunning} className="px-3 py-1 text-xs font-bold text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10 disabled:opacity-30 disabled:cursor-not-allowed">⏯ STEP</button>
         </div>
 
@@ -159,7 +165,7 @@ export default function Toolbar() {
         </div>
       </div>
       
-      {/* TABS (Без змін) */}
+      {/* TABS */}
       <div className="flex items-end px-2 gap-1 overflow-x-auto h-8 bg-black/5 dark:bg-black/20">
          {projects && Object.values(projects).map(p => (
             <div key={p.id} onClick={() => setActiveProject(p.id)} className={`group flex items-center gap-2 px-3 py-1.5 text-xs font-bold cursor-pointer rounded-t-lg select-none min-w-[100px] border-t border-x ${p.id === activeProjectId ? 'bg-[var(--bg-color)] border-[var(--sidebar-border)] text-[var(--text-primary)] relative top-[1px]' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5'}`}>
