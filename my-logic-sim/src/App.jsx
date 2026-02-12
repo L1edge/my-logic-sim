@@ -4,17 +4,19 @@ import 'reactflow/dist/style.css';
 import { nanoid } from 'nanoid'; 
 import useStore from './store/useStore';
 
+// === COMPONENTS ===
 import Sidebar from './components/Sidebar';
 import Toolbar from './components/Toolbar';
 import PropertiesPanel from './components/PropertiesPanel';
+import CustomModuleModal from './components/CustomModuleModal';
+import WaveformPanel from './components/WaveFormPanel'; // Перевір, щоб ім'я файлу збігалося!
+
+// === NODES ===
 import LogicGate from './components/nodes/LogicGate';
 import InputNode from './components/nodes/InputNode';
 import OutputNode from './components/nodes/OutputNode';
 import ConstantNode from './components/nodes/ConstantNode';
 import CustomScriptNode from './components/nodes/CustomScriptNode';
-
-// 1. ІМПОРТУЄМО НАШЕ ВІКНО СЮДИ:
-import CustomModuleModal from './components/CustomModuleModal';
 
 const nodeTypes = {
   logicGate: LogicGate,
@@ -36,6 +38,7 @@ function Flow() {
   const nodes = getNodes();
   const edges = getEdges();
 
+  // Оновлення теми через атрибут data-theme
   useEffect(() => {
     const appContainer = document.getElementById('app-container');
     if (appContainer) appContainer.setAttribute('data-theme', theme);
@@ -46,8 +49,10 @@ function Flow() {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
+  // === ЛОГІКА onDrop ===
   const onDrop = useCallback((event) => {
     event.preventDefault();
+
     const type = event.dataTransfer.getData('application/reactflow');
     const label = event.dataTransfer.getData('label');
     const value = event.dataTransfer.getData('value'); 
@@ -60,31 +65,34 @@ function Flow() {
       y: event.clientY - reactFlowBounds.top,
     };
 
-    // Формуємо правильні дані залежно від типу ноди
-    const nodeData = { 
-      label, 
-      type: label 
-    };
+    const nodeData = { label };
     
     if (type === 'customScriptNode') {
-      // Якщо це кастомний модуль, value - це текстовий ID (custom_123)
       nodeData.moduleId = value;
-      nodeData.value = {}; // Для виходів створюємо порожній об'єкт
+      nodeData.value = {}; 
     } else {
-      // Для звичайних констант і входів
-      nodeData.value = value ? parseInt(value) : 0;
-      nodeData.constantValue = value ? parseInt(value) : undefined;
-      nodeData.inputs = 2;
+      nodeData.type = type;
+      const parsedVal = value ? parseInt(value) : 0;
+      nodeData.value = parsedVal;
+      
+      if (type === 'constantNode') {
+          nodeData.constantValue = parsedVal;
+      }
+      
+      if (type === 'logicGate') {
+          nodeData.inputs = 2;
+      }
     }
 
-  const newNode = {
-        id: nanoid(),
-        type,
-        position,
-        data: nodeData, 
-      };
-      addNode(newNode);
-    }, [addNode]);
+    const newNode = {
+      id: nanoid(),
+      type,
+      position,
+      data: nodeData, 
+    };
+
+    addNode(newNode);
+  }, [addNode]);
     
   const onEdgeDoubleClick = useCallback((event, edge) => {
     event.stopPropagation();
@@ -92,17 +100,26 @@ function Flow() {
   }, [deleteEdge]);
 
   return (
-    <div id="app-container" className="flex flex-col h-screen w-screen relative overflow-hidden transition-colors duration-300" data-theme={theme}>
-      <div className="app-background"></div>
-
+    // 👇👇👇 ОСЬ ТУТ БУЛА ПРОБЛЕМА. ДОДАВ style={{ backgroundColor... }}
+    <div 
+      id="app-container" 
+      className="flex flex-col h-screen w-screen relative overflow-hidden transition-colors duration-300" 
+      data-theme={theme}
+      style={{ backgroundColor: 'var(--bg-color)' }} 
+    >
+      
+      {/* Верхня панель */}
       <Toolbar />
       
-      {/* 2. РЕНДЕРИМО ВІКНО НАД УСІМ ІНТЕРФЕЙСОМ */}
+      {/* Модальне вікно (поверх усього) */}
       <CustomModuleModal />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
+        
+        {/* Ліва панель (інструменти) */}
         <Sidebar />
 
+        {/* ЦЕНТРАЛЬНА ЧАСТИНА (CANVAS) */}
         <div className="flex-grow h-full relative" ref={wrapper}>
           <ReactFlow
             key={activeProjectId} 
@@ -117,12 +134,22 @@ function Flow() {
             onEdgeDoubleClick={onEdgeDoubleClick}
             deleteKeyCode={['Backspace', 'Delete']}
             fitView
+            defaultEdgeOptions={{ type: 'smoothstep', animated: false }}
           >
             <Background color={theme === 'light' ? '#aaa' : '#555'} gap={20} size={1} />
             <Controls />
           </ReactFlow>
+
+          <WaveformPanel />
+          
+          {/* Футер */}
+           <div className="absolute bottom-4 right-4 z-50 text-[10px] sm:text-xs text-gray-400 opacity-60 hover:opacity-100 transition-opacity bg-black/20 dark:bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10 flex items-center gap-3 font-mono pointer-events-none">
+              <span>LogicSim</span>
+           </div>
+
         </div>
 
+        {/* Права панель (властивості) */}
         <PropertiesPanel />
       </div>
     </div>

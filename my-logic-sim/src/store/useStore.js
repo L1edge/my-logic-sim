@@ -5,6 +5,7 @@ import { evaluateCircuit } from '../utils/logic';
 import { nanoid } from 'nanoid';
 
 const defaultProjectId = nanoid();
+const getRandomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16);
 
 const useStore = create(
   persist(
@@ -21,24 +22,74 @@ const useStore = create(
       theme: 'dark',
       setTheme: (theme) => set({ theme }),
 
-    // === КАСТОМНІ МОДУЛІ ===
-          customModules: {},
-          isCustomModalOpen: false,
-          editingModuleId: null, // <--- ДОДАЛИ: ID модуля, який ми зараз редагуємо
-          
-          setEditingModuleId: (id) => set({ editingModuleId: id }), // <--- ДОДАЛИ
-          setCustomModalOpen: (isOpen) => set({ isCustomModalOpen: isOpen }),
-          
-          saveCustomModule: (moduleData) => set(state => ({
-              customModules: { ...state.customModules, [moduleData.id]: moduleData }
-          })),
-          deleteCustomModule: (id) => set(state => {
-              const newMods = { ...state.customModules };
-              delete newMods[id];
-              return { customModules: newMods };
-          }),
-      // ================================================================
+      // === UI STATE (ВИДИМІСТЬ ПАНЕЛЕЙ) ===
+      isSidebarOpen: true,
+      isPropertiesOpen: true,
 
+      toggleSidebar: () => set(s => ({ isSidebarOpen: !s.isSidebarOpen })),
+      toggleProperties: () => set(s => ({ isPropertiesOpen: !s.isPropertiesOpen })),
+
+      // === КАСТОМНІ МОДУЛІ ===
+      customModules: {},
+      isCustomModalOpen: false,
+      editingModuleId: null,
+      
+      setEditingModuleId: (id) => set({ editingModuleId: id }),
+      setCustomModalOpen: (isOpen) => set({ isCustomModalOpen: isOpen }),
+      
+      saveCustomModule: (moduleData) => set(state => ({
+          customModules: { ...state.customModules, [moduleData.id]: moduleData }
+      })),
+      deleteCustomModule: (id) => set(state => {
+          const newMods = { ...state.customModules };
+          delete newMods[id];
+          return { customModules: newMods };
+      }),
+
+      // === WAVEFORM (ЧАСОВІ ДІАГРАМИ) ===
+      isWaveformOpen: false,
+      waveformSignals: [], 
+      waveformData: [],
+      
+      toggleWaveformPanel: () => set(s => ({ isWaveformOpen: !s.isWaveformOpen })),
+      
+      addSignalToWaveform: (edgeId, label) => set(s => {
+          if (s.waveformSignals.find(sig => sig.id === edgeId)) return {}; 
+          return { waveformSignals: [...s.waveformSignals, { id: edgeId, label, color: getRandomColor() }] };
+      }),
+      
+      removeSignalFromWaveform: (edgeId) => set(s => ({
+          waveformSignals: s.waveformSignals.filter(sig => sig.id !== edgeId)
+      })),
+
+      // Функція запису історії
+      recordWaveformStep: (currentNodes, currentEdges) => {
+        const { waveformSignals, waveformData } = get();
+        if (waveformSignals.length === 0) return;
+
+        const time = waveformData.length;
+        const snapshot = { time };
+        
+        waveformSignals.forEach(sig => {
+             const edge = currentEdges.find(e => e.id === sig.id);
+             if (edge) {
+                 const sourceNode = currentNodes.find(n => n.id === edge.source);
+                 let val = sourceNode?.data?.value ?? 0;
+                 
+                 if (typeof val === 'object' && val !== null && edge.sourceHandle) {
+                    const pinName = edge.sourceHandle.replace('output-', '');
+                    val = val[pinName] ?? 0;
+                 }
+                 
+                 snapshot[sig.id] = typeof val === 'number' ? val : 0;
+             }
+        });
+
+        const newHistory = [...waveformData, snapshot].slice(-150);
+        set({ waveformData: newHistory });
+      },
+
+      // === PROJECT MANAGEMENT ===
       createNewProject: () => {
         const newId = nanoid();
         set(state => ({
@@ -129,13 +180,14 @@ const useStore = create(
             return { ...node, data: { ...node.data, value: null } };
         });
         const resetEdges = currentProject.edges.map(edge => ({
-            ...edge, animated: false, type: 'smoothstep', style: { ...edge.style, stroke: '#555', strokeWidth: 2 }
+            ...edge, animated: false, className: '', type: 'smoothstep', style: { ...edge.style, stroke: '#555', strokeWidth: 2 }
         }));
 
         set({ 
             isRunning: false, 
             intervalId: null,
             testBenchCounter: 0,
+            waveformData: [], 
             projects: { ...projects, [activeProjectId]: { ...currentProject, nodes: resetNodes, edges: resetEdges } }
         });
       },
@@ -166,17 +218,53 @@ const useStore = create(
         get().runSimulationStep();
       },
 
-        runSimulationStep: () => {
-              // ДІСТАЄМО customModules
-              const { activeProjectId, projects, customModules } = get(); 
-              const currentProject = projects[activeProjectId];
-              
-              // ПЕРЕДАЄМО customModules ТРЕТІМ АРГУМЕНТОМ
-              const { updatedNodes, updatedEdges } = evaluateCircuit(currentProject.nodes, currentProject.edges, customModules); 
-              
-              const preservedEdges = updatedEdges.map(e => ({ ...e, type: 'smoothstep' }));
-              set({ projects: { ...projects, [activeProjectId]: { ...currentProject, nodes: updatedNodes, edges: preservedEdges } } });
-            }
+      runSimulationStep: () => {
+            const { activeProjectId, projects, customModules } = get(); 
+            const currentProject = projects[activeProjectId];
+            
+            const { updatedNodes, updatedEdges } = evaluateCircuit(currentProject.nodes, currentProject.edges, customModules); 
+            
+            const nodeValueMap = {};
+            updatedNodes.forEach(n => { nodeValueMap[n.id] = n.data.value; });
+
+            const processedEdges = updatedEdges.map(newEdge => {
+                const oldEdge = currentProject.edges.find(e => e.id === newEdge.id);
+                
+                let currentVal = nodeValueMap[newEdge.source];
+                if (typeof currentVal === 'object' && currentVal !== null && newEdge.sourceHandle) {
+                    currentVal = currentVal[newEdge.sourceHandle.replace('output-', '')];
+                }
+
+                const oldVal = oldEdge?.data?.lastValue;
+                const hasChanged = currentVal !== undefined && oldVal !== undefined && currentVal !== oldVal;
+
+                let newClass = (newEdge.className || '').replace('neon-flow', '');
+                if (hasChanged) newClass += ' neon-flow';
+
+                return {
+                    ...newEdge,
+                    type: 'smoothstep',
+                    className: newClass.trim(),
+                    data: { ...newEdge.data, lastValue: currentVal } 
+                };
+            });
+            
+            set({ projects: { ...projects, [activeProjectId]: { ...currentProject, nodes: updatedNodes, edges: processedEdges } } });
+            
+            get().recordWaveformStep(updatedNodes, processedEdges);
+
+            setTimeout(() => {
+                const { activeProjectId, projects } = get();
+                const proj = projects[activeProjectId];
+                if (!proj) return;
+
+                const cleanEdges = proj.edges.map(e => ({
+                    ...e,
+                    className: (e.className || '').replace('neon-flow', '')
+                }));
+                set({ projects: { ...projects, [activeProjectId]: { ...proj, edges: cleanEdges } } });
+            }, 400);
+      }
     }),
     {
       name: 'logicsim-storage',
@@ -185,7 +273,10 @@ const useStore = create(
         activeProjectId: state.activeProjectId,
         theme: state.theme,
         testBenchCounter: state.testBenchCounter,
-        customModules: state.customModules // <--- Зберігаємо наші написані модулі
+        customModules: state.customModules,
+        // Зберігаємо стан панелей
+        isSidebarOpen: state.isSidebarOpen,
+        isPropertiesOpen: state.isPropertiesOpen
       }),
     }
   )

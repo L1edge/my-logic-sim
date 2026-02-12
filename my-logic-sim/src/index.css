@@ -163,3 +163,17 @@ input, select {
 [data-theme='glass'] .react-flow__edge-path { filter: drop-shadow(0 0 5px currentColor); stroke-width: 3px !important; }
 .react-flow__edge.selected .react-flow__edge-path { stroke: #3b82f6 !important; stroke-width: 4px !important; filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)); }
 .react-flow__edge:hover .react-flow__edge-path { stroke-width: 4px !important; cursor: pointer; }
+@keyframes dashDraw {
+  0% { stroke-dashoffset: 20; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.neon-flow path {
+  stroke: #00f2ff !important; /* Неоновий ціан */
+  stroke-width: 3px !important;
+  stroke-dasharray: 5;
+  animation: dashDraw 0.3s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(0, 242, 255, 0.8));
+  z-index: 9999;
+  transition: all 0.3s ease;
+}

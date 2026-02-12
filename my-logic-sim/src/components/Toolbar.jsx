@@ -128,7 +128,7 @@ const {
       {/* HEADER */}
       <div className="h-12 flex items-center px-4 justify-between shadow-sm z-20">
         <div className="flex items-center gap-4">
-          <h1 className="font-bold text-lg tracking-tight text-blue-500">LogicSim <span className="text-[10px] text-gray-500">PRO</span></h1>
+          <h1 className="font-bold text-lg tracking-tight text-blue-500">LogicSim</h1>
           <div className="flex gap-1 items-center">
              <button onClick={handleSave} className="px-3 py-1 text-xs font-bold border rounded hover:bg-white/10 transition flex items-center gap-2" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}>💾 SAVE</button>
              <button onClick={handleOpenClick} className="px-3 py-1 text-xs font-bold border rounded hover:bg-white/10 transition flex items-center gap-2" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}>📂 OPEN</button>
@@ -151,7 +151,7 @@ const {
           <button onClick={stepSimulation} disabled={isRunning} className="px-3 py-1 text-xs font-bold text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10 disabled:opacity-30 disabled:cursor-not-allowed">⏯ STEP</button>
         </div>
 
-          {/* EXPORT MENU */}
+           {/* EXPORT MENU */}
             <div className="relative">
                 <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-1 text-xs font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500 transition-colors flex items-center gap-2 shadow-sm">
                     Export HDL ▼

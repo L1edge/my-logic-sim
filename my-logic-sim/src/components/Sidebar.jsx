@@ -26,15 +26,13 @@ const Category = ({ title, children, defaultOpen = true }) => {
   );
 };
 
-// ДОДАЛИ onDoubleClick та onDelete
 const ToolItem = ({ type, label, icon, colorClass, onDragStart, value, onDoubleClick, onDelete }) => (
   <div 
     className={`flex flex-col items-center justify-center p-3 rounded-lg cursor-grab transition-all duration-200 border border-transparent hover:border-white/10 hover:shadow-lg hover:bg-white/5 active:scale-95 bg-white/5 dark:bg-slate-800/40 backdrop-blur-sm group relative overflow-hidden`}
     draggable
     onDragStart={(event) => onDragStart(event, type, label, value)}
-    onDoubleClick={onDoubleClick} // <--- Дабл-клік для редагування
+    onDoubleClick={onDoubleClick} 
   >
-    {/* ІКОНКА ВИДАЛЕННЯ (з'являється при наведенні) */}
     {onDelete && (
       <div 
         onClick={(e) => { e.stopPropagation(); onDelete(value); }}
@@ -54,7 +52,10 @@ const ToolItem = ({ type, label, icon, colorClass, onDragStart, value, onDoubleC
 );
 
 export default function Sidebar() {
-  const { theme, setTheme, customModules = {}, deleteCustomModule, setEditingModuleId, setCustomModalOpen } = useStore(); 
+  const { 
+      theme, setTheme, customModules = {}, deleteCustomModule, setEditingModuleId, setCustomModalOpen,
+      isSidebarOpen, toggleSidebar // <--- НОВІ ЗМІННІ
+  } = useStore(); 
   
   const onDragStart = (event, nodeType, label, value) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
@@ -64,72 +65,89 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-72 p-4 border-r h-full flex flex-col gap-6 shadow-xl z-10 overflow-y-auto transition-colors duration-300 sidebar-backdrop" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}>
-      <div>
-        <div className="flex items-center gap-3 mb-5 px-1">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-blue-500/30">L</div>
-          <div><h2 className="font-bold text-lg leading-none tracking-tight">LogicSim</h2></div>
+    // relative для позиціонування кнопки
+    <div className="relative h-full flex z-40"> 
+        <aside 
+            className={`h-full border-r shadow-xl z-10 overflow-y-auto transition-all duration-300 ease-in-out whitespace-nowrap sidebar-backdrop
+                ${isSidebarOpen ? 'w-72 p-4 opacity-100' : 'w-0 p-0 opacity-0 border-none overflow-hidden'}
+            `}
+            style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}
+        >
+        <div>
+            <div className="flex items-center gap-3 mb-5 px-1">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-blue-500/30">L</div>
+            <div><h2 className="font-bold text-lg leading-none tracking-tight">LogicSim</h2></div>
+            </div>
+            <div className="relative group">
+            <select value={theme} onChange={(e) => setTheme(e.target.value)} className="w-full p-2 pl-3 rounded-lg border text-xs font-bold appearance-none cursor-pointer outline-none transition-all hover:bg-black/5 dark:hover:bg-white/5 focus:ring-2 focus:ring-blue-500/30" style={{ backgroundColor: theme === 'glass' ? 'rgba(0,0,0,0.1)' : 'var(--bg-color)', color: 'var(--text-primary)', borderColor: 'var(--sidebar-border)' }}>
+                <option value="light">☀️ Light Theme</option>
+                <option value="dark">🌑 Dark Theme</option>
+                <option value="glass">💧 Liquid Glass</option>
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity text-[10px]">▼</div>
+            </div>
         </div>
-        <div className="relative group">
-          <select value={theme} onChange={(e) => setTheme(e.target.value)} className="w-full p-2 pl-3 rounded-lg border text-xs font-bold appearance-none cursor-pointer outline-none transition-all hover:bg-black/5 dark:hover:bg-white/5 focus:ring-2 focus:ring-blue-500/30" style={{ backgroundColor: theme === 'glass' ? 'rgba(0,0,0,0.1)' : 'var(--bg-color)', color: 'var(--text-primary)', borderColor: 'var(--sidebar-border)' }}>
-            <option value="light">☀️ Light Theme</option>
-            <option value="dark">🌑 Dark Theme</option>
-            <option value="glass">💧 Liquid Glass</option>
-          </select>
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity text-[10px]">▼</div>
+        
+        <div className="flex-1 overflow-y-auto pr-1 space-y-2 mt-6 custom-scrollbar">
+            <Category title="Сигнали" defaultOpen={true}>
+            <ToolItem type="constantNode" label="GND (0)" value={0} icon={ICONS.GND} onDragStart={onDragStart} colorClass="text-gray-500 dark:text-gray-400" />
+            <ToolItem type="constantNode" label="VCC (1)" value={1} icon={ICONS.VCC} onDragStart={onDragStart} colorClass="text-red-500 group-hover:text-red-400 shadow-red-500/20" />
+            </Category>
+
+            <Category title="Ввід / Вивід" defaultOpen={true}>
+            <ToolItem type="inputNode" label="Switch" icon={ICONS.INPUT} onDragStart={onDragStart} colorClass="text-green-500 group-hover:text-green-400" />
+            <ToolItem type="outputNode" label="LED" icon={ICONS.OUTPUT} onDragStart={onDragStart} colorClass="text-orange-500 group-hover:text-orange-400" />
+            </Category>
+            
+            <Category title="Логічні Елементи" defaultOpen={true}>
+            <ToolItem type="logicGate" label="AND" icon={ICONS.AND} onDragStart={onDragStart} colorClass="text-blue-500 group-hover:text-blue-400" />
+            <ToolItem type="logicGate" label="NAND" icon={ICONS.NAND} onDragStart={onDragStart} colorClass="text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-500" />
+            <ToolItem type="logicGate" label="OR" icon={ICONS.OR} onDragStart={onDragStart} colorClass="text-purple-500 group-hover:text-purple-400" />
+            <ToolItem type="logicGate" label="XOR" icon={ICONS.XOR} onDragStart={onDragStart} colorClass="text-teal-500 group-hover:text-teal-400" />
+            <div className="col-span-2"> 
+                <ToolItem type="logicGate" label="NOT" icon={ICONS.NOT} onDragStart={onDragStart} colorClass="text-rose-500 group-hover:text-rose-400" />
+            </div>
+            </Category>
+
+            {Object.keys(customModules).length > 0 && (
+            <Category title="Мої Модулі" defaultOpen={true}>
+                {Object.values(customModules).map(mod => (
+                <ToolItem 
+                    key={mod.id}
+                    type="customScriptNode" 
+                    label={mod.name} 
+                    value={mod.id} 
+                    icon={ICONS.CUSTOM} 
+                    colorClass="text-yellow-400 group-hover:text-yellow-300 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]" 
+                    onDragStart={onDragStart}
+                    
+                    onDoubleClick={() => {
+                        setEditingModuleId(mod.id);
+                        setCustomModalOpen(true);
+                    }}
+                    onDelete={() => {
+                        if(window.confirm(`Ви дійсно хочете видалити модуль "${mod.name}"?`)) {
+                            deleteCustomModule(mod.id);
+                        }
+                    }}
+                />
+                ))}
+            </Category>
+            )}
+            
         </div>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto pr-1 space-y-2">
-        <Category title="Сигнали" defaultOpen={true}>
-          <ToolItem type="constantNode" label="GND (0)" value={0} icon={ICONS.GND} onDragStart={onDragStart} colorClass="text-gray-500 dark:text-gray-400" />
-          <ToolItem type="constantNode" label="VCC (1)" value={1} icon={ICONS.VCC} onDragStart={onDragStart} colorClass="text-red-500 group-hover:text-red-400 shadow-red-500/20" />
-        </Category>
+        </aside>
 
-        <Category title="Ввід / Вивід" defaultOpen={true}>
-          <ToolItem type="inputNode" label="Switch" icon={ICONS.INPUT} onDragStart={onDragStart} colorClass="text-green-500 group-hover:text-green-400" />
-          <ToolItem type="outputNode" label="LED" icon={ICONS.OUTPUT} onDragStart={onDragStart} colorClass="text-orange-500 group-hover:text-orange-400" />
-        </Category>
-        
-        <Category title="Логічні Елементи" defaultOpen={true}>
-          <ToolItem type="logicGate" label="AND" icon={ICONS.AND} onDragStart={onDragStart} colorClass="text-blue-500 group-hover:text-blue-400" />
-          <ToolItem type="logicGate" label="NAND" icon={ICONS.NAND} onDragStart={onDragStart} colorClass="text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-500" />
-          <ToolItem type="logicGate" label="OR" icon={ICONS.OR} onDragStart={onDragStart} colorClass="text-purple-500 group-hover:text-purple-400" />
-          <ToolItem type="logicGate" label="XOR" icon={ICONS.XOR} onDragStart={onDragStart} colorClass="text-teal-500 group-hover:text-teal-400" />
-          <div className="col-span-2"> 
-             <ToolItem type="logicGate" label="NOT" icon={ICONS.NOT} onDragStart={onDragStart} colorClass="text-rose-500 group-hover:text-rose-400" />
-          </div>
-        </Category>
-
-        {Object.keys(customModules).length > 0 && (
-          <Category title="Мої Модулі" defaultOpen={true}>
-            {Object.values(customModules).map(mod => (
-              <ToolItem 
-                key={mod.id}
-                type="customScriptNode" 
-                label={mod.name} 
-                value={mod.id} 
-                icon={ICONS.CUSTOM} 
-                colorClass="text-yellow-400 group-hover:text-yellow-300 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]" 
-                onDragStart={onDragStart}
-                
-                // === МАГІЯ ТУТ: Дабл-клік та Видалення ===
-                onDoubleClick={() => {
-                   setEditingModuleId(mod.id);
-                   setCustomModalOpen(true);
-                }}
-                onDelete={() => {
-                   // Запитуємо підтвердження, щоб випадково не видалити
-                   if(window.confirm(`Ви дійсно хочете видалити модуль "${mod.name}"?`)) {
-                       deleteCustomModule(mod.id);
-                   }
-                }}
-              />
-            ))}
-          </Category>
-        )}
-        
-      </div>
-    </aside>
+        {/* === КНОПКА-ЯЗИЧОК === */}
+        <button
+            onClick={toggleSidebar}
+            className="absolute top-1/2 -right-3 w-3 h-12 bg-gray-600 hover:bg-blue-500 rounded-r border-y border-r border-white/20 flex items-center justify-center transition-colors shadow-md z-50 translate-y-[-50%]"
+            title="Toggle Sidebar"
+        >
+        <span className="text-[8px] text-white leading-none">
+            {isSidebarOpen ? '◀' : '▶'}
+        </span>
+        </button>
+    </div>
   );
 }
