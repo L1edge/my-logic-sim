@@ -177,3 +177,22 @@ input, select {
   z-index: 9999;
   transition: all 0.3s ease;
 }
+.react-flow__node-logicGate {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Приховуємо заголовок та тіло дефолтної ноди, якщо вони рендериться */
+.react-flow__node-logicGate .react-flow__node-header,
+.react-flow__node-logicGate .react-flow__node-body {
+  display: none !important;
+}
+
+/* Також для інших типів, якщо потрібно */
+.react-flow__node-inputNode, .react-flow__node-outputNode {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}

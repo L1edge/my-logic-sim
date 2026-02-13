@@ -9,7 +9,9 @@ const ICONS = {
   AND: (<path d="M5 5V19H12C16 19 19 16 19 12C19 8 16 5 12 5H5Z" stroke="currentColor" strokeWidth="2" fill="none"/>),
   NAND: (<g stroke="currentColor" strokeWidth="2" fill="none"><path d="M3 5V19H10C14 19 17 16 17 12C17 8 14 5 10 5H3Z" /><circle cx="20" cy="12" r="2" /></g>),
   OR: (<path d="M4 5C4 5 9 12 4 19C10 19 15 19 19 12C15 5 10 5 4 5Z" stroke="currentColor" strokeWidth="2" fill="none"/>),
+  NOR: (<g stroke="currentColor" strokeWidth="2" fill="none"><path d="M4 5C4 5 9 12 4 19C10 19 14 19 18 12C14 5 10 5 4 5Z" /><circle cx="21" cy="12" r="2" /></g>),
   XOR: (<g stroke="currentColor" strokeWidth="2" fill="none"><path d="M7 5C7 5 12 12 7 19C13 19 18 19 22 12C18 5 13 5 7 5Z" /><path d="M3 5C3 5 8 12 3 19" /></g>),
+  XNOR: (<g stroke="currentColor" strokeWidth="2" fill="none"><path d="M7 5C7 5 12 12 7 19C13 19 17 19 21 12C17 5 13 5 7 5Z" /><path d="M3 5C3 5 8 12 3 19" /><circle cx="23.5" cy="12" r="1.5" /></g>),
   NOT: (<g stroke="currentColor" strokeWidth="2" fill="none"><path d="M4 5V19L16 12L4 5Z" /><circle cx="19" cy="12" r="2" /></g>),
   CUSTOM: (<g stroke="currentColor" strokeWidth="2" fill="none"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M8 10L12 14L16 10" /></g>)
 };
@@ -103,7 +105,9 @@ export default function Sidebar() {
             <ToolItem type="logicGate" label="AND" icon={ICONS.AND} onDragStart={onDragStart} colorClass="text-blue-500 group-hover:text-blue-400" />
             <ToolItem type="logicGate" label="NAND" icon={ICONS.NAND} onDragStart={onDragStart} colorClass="text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-500" />
             <ToolItem type="logicGate" label="OR" icon={ICONS.OR} onDragStart={onDragStart} colorClass="text-purple-500 group-hover:text-purple-400" />
+            <ToolItem type="logicGate" label="NOR" icon={ICONS.NOR} onDragStart={onDragStart} colorClass="text-fuchsia-500 group-hover:text-fuchsia-400" />
             <ToolItem type="logicGate" label="XOR" icon={ICONS.XOR} onDragStart={onDragStart} colorClass="text-teal-500 group-hover:text-teal-400" />
+            <ToolItem type="logicGate" label="XNOR" icon={ICONS.XNOR} onDragStart={onDragStart} colorClass="text-cyan-500 group-hover:text-cyan-400" />
             <div className="col-span-2"> 
                 <ToolItem type="logicGate" label="NOT" icon={ICONS.NOT} onDragStart={onDragStart} colorClass="text-rose-500 group-hover:text-rose-400" />
             </div>
