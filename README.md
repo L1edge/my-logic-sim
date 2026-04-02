@@ -48,100 +48,119 @@ To run the project locally on your computer, follow these steps:
 
 -----
 
-## \<a id="українська"\>\</a\> 🇺🇦 Українська
+<a id="українська"></a> 🇺🇦 Українська
 
-**LogicSim** — це сучасне кросплатформне веб-середовище для автоматизованого проєктування, інтерактивного моделювання та аналізу цифрових логічних схем. Проєкт створений як легка, швидка та доступна альтернатива важковаговим десктопним САПР (EDA), таким як Active-HDL чи Quartus.
+LogicSim — це сучасне кросплатформне веб-середовище для автоматизованого проєктування, інтерактивного моделювання та аналізу цифрових логічних схем. Проєкт створений як легка, швидка та доступна альтернатива важковаговим десктопним САПР (EDA), таким як Active-HDL чи Quartus.
 
-🎓 *Проєкт розроблено в рамках бакалаврської кваліфікаційної роботи.*
+🎓 Проєкт розроблено в рамках бакалаврської кваліфікаційної роботи.
+✨ Головні можливості
 
-### ✨ Головні можливості
+    🖱️ Інтерактивний графічний редактор: Побудова схем за допомогою Drag-and-Drop на базі нескінченного полотна (React Flow).
 
-  * 🖱️ **Інтерактивний графічний редактор:** Побудова схем за допомогою Drag-and-Drop на базі нескінченного полотна (React Flow).
-  * ⚙️ **Симуляція в реальному часі:** Дискретно-подієве моделювання з використанням оптимізованих побітових операцій. Миттєва візуалізація руху сигналу (неонова анімація дротів) та станів вентилів.
-  * 📦 **Багата бібліотека компонентів:** Базові логічні вентилі (AND, OR, XOR, NAND, NOR, XNOR, NOT) з динамічною кількістю входів (від 1 до 8), генератори сигналів, константи та індикатори.
-  * 📝 **Експорт у HDL:** Автоматична трансляція візуального графа схеми у професійний структурний код **Verilog** та **VHDL**.
-  * 🧪 **Генерація Testbench:** Автоматичне створення вичерпного тестового оточення (Testbench) для зовнішньої верифікації розроблених схем.
-  * 📈 **Аналізатор часових діаграм (Waveform):** Вбудований інструмент діагностики на базі HTML5 Canvas для відстеження таймінгів сигналів у реальному часі.
-  * 🎨 **Сучасний UI/UX:** Адаптивні теми оформлення, включаючи унікальну тему "Liquid Glass" з ефектами матового скла (`backdrop-filter`).
-  * 💾 **Збереження проєктів:** Серіалізація стану графа у формат JSON для збереження та обміну схемами.
+    ⚙️ Симуляція в реальному часі: Дискретно-подієве моделювання з використанням оптимізованих побітових операцій. Миттєва візуалізація руху сигналу (неонова анімація дротів) та станів вентилів.
 
-### 🛠 Технологічний стек
+    📦 Багата бібліотека компонентів: Базові логічні вентилі (AND, OR, XOR, NAND, NOR, XNOR, NOT) з динамічною кількістю входів (від 1 до 8), генератори сигналів, константи та індикатори.
 
-  * **Frontend Framework:** React.js (v18+)
-  * **State Management:** Zustand (високопродуктивне управління станом без зайвих ре-рендерів)
-  * **Graph Engine:** React Flow (апаратне прискорення трансформацій та рендерингу вузлів)
-  * **Styling:** Tailwind CSS + CSS Custom Properties
-  * **Build Tool:** Vite
-  * **Others:** HTML5 Canvas API (для Waveform), HTML5 Drag-and-Drop API
+    📝 Експорт у HDL: Автоматична трансляція візуального графа схеми у професійний структурний код Verilog та VHDL.
 
-### 🚀 Встановлення та запуск (Local Development)
+    🧪 Генерація Testbench: Автоматичне створення вичерпного тестового оточення (Testbench) для зовнішньої верифікації розроблених схем.
+
+    📈 Аналізатор часових діаграм (Waveform): Вбудований інструмент діагностики на базі HTML5 Canvas для відстеження таймінгів сигналів у реальному часі.
+
+    🎨 Сучасний UI/UX: Адаптивні теми оформлення, включаючи унікальну тему "Liquid Glass" з ефектами матового скла (backdrop-filter).
+
+    💾 Збереження проєктів: Серіалізація стану графа у формат JSON для збереження та обміну схемами.
+
+🛠 Технологічний стек
+
+    Frontend Framework: React.js (v18+)
+
+    State Management: Zustand
+
+    Graph Engine: React Flow
+
+    Styling: Tailwind CSS + CSS Custom Properties
+
+    Build Tool: Vite
+
+🚀 Встановлення та запуск (Local Development)
 
 Щоб запустити проєкт локально на вашому комп'ютері, виконайте наступні кроки:
 
-1.  **Клонуйте репозиторій:**
-    ```bash
-    git clone https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git
-    cd my-logic-sim
-    ```
-2.  **Встановіть залежності:**
-    Переконайтеся, що у вас встановлений [Node.js](https://www.google.com/search?q=https://nodejs.org/).
-    ```bash
-    npm install
-    ```
-3.  **Запустіть сервер розробки:**
-    ```bash
-    npm run dev
-    ```
-4.  **Відкрийте браузер** і перейдіть за адресою: `http://localhost:5173`
+    Клонуйте репозиторій:
+    Bash
 
+    git clone [https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
+    cd my-logic-sim
+
+    Встановіть залежності:
+    Переконайтеся, що у вас встановлений Node.js.
+    Bash
+
+    npm install
+
+    Запустіть сервер розробки:
+    Bash
+
+    npm run dev
+
+    Відкрийте браузер і перейдіть за адресою: http://localhost:5173
 -----
 
-## \<a id="polski"\>\</a\> 🇵🇱 Polski
+<a id="polski"></a> 🇵🇱 Polski
 
-**LogicSim** to nowoczesne, wieloplatformowe środowisko webowe do zautomatyzowanego projektowania, interaktywnej symulacji i analizy cyfrowych układów logicznych. Projekt powstał jako lekka, szybka i przystępna alternatywa dla ciężkich, desktopowych programów EDA (Electronic Design Automation), takich jak Active-HDL czy Quartus.
+LogicSim to nowoczesne, wieloplatformowe środowisko webowe do zautomatyzowanego projektowania, interaktywnej symulacji i analizy cyfrowych układów logicznych. Projekt powstał jako lekka, szybka i przystępna alternatywa dla ciężkich, desktopowych programów EDA (Electronic Design Automation), takich jak Active-HDL czy Quartus.
 
-🎓 *Projekt został zrealizowany w ramach pracy inżynierskiej / licencjackiej.*
+🎓 Projekt został zrealizowany w ramach pracy inżynierskiej / licencjackiej.
+✨ Główne możliwości
 
-### ✨ Główne możliwości
+    🖱️ Interaktywny edytor graficzny: Budowanie układów metodą Drag-and-Drop na nieskończonym płótnie (React Flow).
 
-  * 🖱️ **Interaktywny edytor graficzny:** Budowanie układów metodą Drag-and-Drop na nieskończonym płótnie (React Flow).
-  * ⚙️ **Symulacja w czasie rzeczywistym:** Symulacja zdarzeń dyskretnych z wykorzystaniem zoptymalizowanych operacji bitowych. Błyskawiczna wizualizacja przepływu sygnału (neonowa animacja przewodów) i stanów bramek.
-  * 📦 **Bogata biblioteka komponentów:** Podstawowe bramki logiczne (AND, OR, XOR, NAND, NOR, XNOR, NOT) z dynamiczną liczbą wejść (od 1 do 8), generatory sygnałów, stałe i wskaźniki.
-  * 📝 **Eksport do HDL:** Automatyczne tłumaczenie wizualnego grafu układu na profesjonalny kod strukturalny **Verilog** i **VHDL**.
-  * 🧪 **Generowanie Testbench:** Automatyczne tworzenie kompleksowego środowiska testowego (Testbench) do zewnętrznej weryfikacji zaprojektowanych układów.
-  * 📈 **Analizator przebiegów czasowych (Waveform):** Wbudowane narzędzie diagnostyczne oparte na HTML5 Canvas do śledzenia synchronizacji sygnałów w czasie rzeczywistym.
-  * 🎨 **Nowoczesny UI/UX:** Adaptacyjne motywy interfejsu, w tym unikalny motyw "Liquid Glass" z efektem matowego szkła (`backdrop-filter`).
-  * 💾 **Zapisywanie projektów:** Serializacja stanu grafu do formatu JSON w celu zapisywania i udostępniania układów.
+    ⚙️ Symulacja w czasie rzeczywistym: Symulacja zdarzeń dyskretnych z wykorzystaniem zoptymalizowanych operacji bitowych. Błyskawiczna wizualizacja przepływu sygnału (neonowa animacja przewodów) i stanów bramek.
 
-### 🛠 Stos technologiczny
+    📦 Bogata biblioteka komponentów: Podstawowe bramki logiczne (AND, OR, XOR, NAND, NOR, XNOR, NOT) z dynamiczną liczbą wejść (od 1 do 8), generatory sygnałów, stałe i wskaźniki.
 
-  * **Frontend Framework:** React.js (v18+)
-  * **State Management:** Zustand (wysokowydajne zarządzanie stanem bez zbędnych ponownych renderowań)
-  * **Graph Engine:** React Flow (akceleracja sprzętowa transformacji i renderowania węzłów)
-  * **Styling:** Tailwind CSS + CSS Custom Properties
-  * **Build Tool:** Vite
-  * **Inne:** HTML5 Canvas API (dla Waveform), HTML5 Drag-and-Drop API
+    📝 Eksport do HDL: Automatyczne tłumaczenie wizualnego grafu układu na profesjonalny kod strukturalny Verilog i VHDL.
 
-### 🚀 Instalacja i uruchomienie (Local Development)
+    🧪 Generowanie Testbench: Automatyczne tworzenie kompleksowego środowiska testowego (Testbench) do zewnętrznej weryfikacji zaprojektowanych układów.
+
+    📈 Analizator przebiegów czasowych (Waveform): Wbudowane narzędzie diagnostyczne oparte na HTML5 Canvas do śledzenia synchronizacji sygnałów w czasie rzeczywistym.
+
+    🎨 Nowoczesny UI/UX: Adaptacyjne motywy interfejsu, w tym unikalny motyw "Liquid Glass" z efektem matowego szkła (backdrop-filter).
+
+    💾 Zapisywanie projektów: Serializacja stanu grafu do formatu JSON w celu zapisywania i udostępniania układów.
+
+🛠 Stos technologiczny
+
+    Frontend Framework: React.js (v18+)
+
+    State Management: Zustand
+
+    Graph Engine: React Flow
+
+    Styling: Tailwind CSS + CSS Custom Properties
+
+    Build Tool: Vite
+
+🚀 Instalacja i uruchomienie (Local Development)
 
 Aby uruchomić projekt lokalnie na swoim komputerze, wykonaj następujące kroki:
 
-1.  **Sklonuj repozytorium:**
-    ```bash
-    git clone https://github.com/username/my-logic-sim.git
+    Sklonuj repozytorium:
+    Bash
+
+    git clone [https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
     cd my-logic-sim
-    ```
-2.  **Zainstaluj zależności:**
-    Upewnij się, że masz zainstalowanego [Node.js](https://www.google.com/search?q=https://nodejs.org/).
-    ```bash
+
+    Zainstaluj zależności:
+    Upewnij się, że masz zainstalowanego Node.js.
+    Bash
+
     npm install
-    ```
-3.  **Uruchom serwer deweloperski:**
-    ```bash
+
+    Uruchom serwer deweloperski:
+    Bash
+
     npm run dev
-    ```
-4.  **Otwórz przeglądarkę** i przejdź pod adres: `http://localhost:5173`
 
------
-
-*Не забудь замінити `ВАШ_ЮЗЕРНЕЙМ` у посиланнях `git clone` на свій логін.*
+    Otwórz przeglądarkę i przejdź pod adres: http://localhost:5173
