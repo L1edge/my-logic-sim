@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import useStore from '../store/useStore';
 
-// Переконайся, що ці файли існують і в них є потрібні функції
 import { generateVerilog, generateVHDL, generateTestbench } from '../utils/hdl-generator';
 import { parseVerilogToGraph, parseVHDLToGraph } from '../utils/hdl-parser'; 
 
@@ -12,10 +11,11 @@ export default function Toolbar() {
       return <div className="h-12 border-b flex items-center px-4 bg-red-900 text-white">Store Error</div>;
   }
 
-const { 
+  // 👇 ОСЬ ТУТ ДОДАНО simulatingProjectId
+  const { 
     projects, activeProjectId, createNewProject, setActiveProject, closeProject, renameProject,
     loadGraph, startSimulation, stopSimulation, stepSimulation, isRunning,
-    setCustomModalOpen, setEditingModuleId 
+    setCustomModalOpen, setEditingModuleId, simulatingProjectId 
   } = store;
   
   const fileInputRef = useRef(null);
@@ -70,7 +70,7 @@ const {
             alert("Verilog imported!");
         } 
 
-        // 3. VHDL (НОВЕ)
+        // 3. VHDL
         else if (fileName.endsWith('.vhd') || fileName.endsWith('.vhdl')) {
             const graph = parseVHDLToGraph(content);
             if(graph.nodes.length === 0) { alert("VHDL: Entity/Architecture not found."); return; }
@@ -133,53 +133,65 @@ const {
              <button onClick={handleSave} className="px-3 py-1 text-xs font-bold border rounded hover:bg-white/10 transition flex items-center gap-2" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}>💾 SAVE</button>
              <button onClick={handleOpenClick} className="px-3 py-1 text-xs font-bold border rounded hover:bg-white/10 transition flex items-center gap-2" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--text-primary)' }}>📂 OPEN</button>
              
-             {/* 2. ДОДАТИ КНОПКУ ОСЬ ТУТ */}
-             <div className="w-px h-5 bg-gray-500/30 mx-1"></div> {/* Розділювач */}
-                <button onClick={() => { setEditingModuleId(null); setCustomModalOpen(true); }} className="px-3 py-1 text-xs font-bold border border-blue-500/50 text-blue-500 rounded hover:bg-blue-500/10 transition flex items-center gap-2 shadow-sm">
+             <div className="w-px h-5 bg-gray-500/30 mx-1"></div>
+             <button onClick={() => { setEditingModuleId(null); setCustomModalOpen(true); }} className="px-3 py-1 text-xs font-bold border border-blue-500/50 text-blue-500 rounded hover:bg-blue-500/10 transition flex items-center gap-2 shadow-sm">
                NEW CUSTOM BLOCK
              </button>
           </div>
         </div>
 
         {/* SIMULATION CONTROLS */}
-        <div className="flex gap-2 bg-black/10 dark:bg-white/5 p-1 rounded">
+        <div className="flex gap-2 bg-black/10 dark:bg-white/5 p-1 rounded items-center">
           {!isRunning ? (
-             <button onClick={startSimulation} className="px-4 py-1 text-xs font-bold text-white bg-green-600 hover:bg-green-500 rounded transition">▶ START</button>
+             <button onClick={startSimulation} className="px-4 py-1 text-xs font-bold text-white bg-green-600 hover:bg-green-500 rounded transition shadow-sm">▶ START</button>
           ) : (
-             <button onClick={stopSimulation} className="px-4 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded transition animate-pulse">⏹ STOP</button>
+             <button 
+                onClick={stopSimulation} 
+                className={`px-4 py-1 text-xs font-bold text-white rounded transition shadow-sm animate-pulse ${
+                    activeProjectId !== simulatingProjectId ? 'bg-orange-500 hover:bg-orange-400' : 'bg-red-600 hover:bg-red-500'
+                }`}
+             >
+               {activeProjectId !== simulatingProjectId ? '⏹ STOP (Інша вкладка)' : '⏹ STOP'}
+             </button>
           )}
-          <button onClick={stepSimulation} disabled={isRunning} className="px-3 py-1 text-xs font-bold text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10 disabled:opacity-30 disabled:cursor-not-allowed">⏯ STEP</button>
+          <button 
+            onClick={stepSimulation} 
+            disabled={isRunning || (simulatingProjectId && activeProjectId !== simulatingProjectId)} 
+            className="px-3 py-1 text-xs font-bold text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            ⏯ STEP
+          </button>
         </div>
 
-           {/* EXPORT MENU */}
-            <div className="relative">
-                <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-1 text-xs font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500 transition-colors flex items-center gap-2 shadow-sm">
-                    Export HDL ▼
-                </button>
-                {showExportMenu && (
-                    <div 
-                        className="absolute right-0 top-full mt-2 w-48 border rounded-lg shadow-2xl overflow-hidden z-50 backdrop-blur-md"
-                        style={{ 
-                            backgroundColor: 'var(--sidebar-bg)', 
-                            borderColor: 'var(--sidebar-border)', 
-                            color: 'var(--text-primary)' 
-                        }}
-                    >
-                        <button onClick={() => { handleExport('verilog'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10">
-                            Verilog (.v)
-                        </button>
-                        <button onClick={() => { handleExport('vhdl'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10">
-                            VHDL (.vhd)
-                        </button>
-                        
-                        <div className="border-t my-1" style={{ borderColor: 'var(--sidebar-border)' }}></div>
-                        
-                        <button onClick={() => { handleExport('testbench'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10 font-bold text-green-500 drop-shadow-[0_0_2px_rgba(34,197,94,0.3)]">
-                            Generate Testbench
-                        </button>
-                    </div>
-                )}
-            </div>
+        {/* EXPORT MENU */}
+        <div className="relative">
+            <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-1 text-xs font-bold text-white bg-indigo-600 rounded hover:bg-indigo-500 transition-colors flex items-center gap-2 shadow-sm">
+                Export HDL ▼
+            </button>
+            {showExportMenu && (
+                <div 
+                    className="absolute right-0 top-full mt-2 w-48 border rounded-lg shadow-2xl overflow-hidden z-50 backdrop-blur-md"
+                    style={{ 
+                        backgroundColor: 'var(--sidebar-bg)', 
+                        borderColor: 'var(--sidebar-border)', 
+                        color: 'var(--text-primary)' 
+                    }}
+                >
+                    <button onClick={() => { handleExport('verilog'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10">
+                        Verilog (.v)
+                    </button>
+                    <button onClick={() => { handleExport('vhdl'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10">
+                        VHDL (.vhd)
+                    </button>
+                    
+                    <div className="border-t my-1" style={{ borderColor: 'var(--sidebar-border)' }}></div>
+                    
+                    <button onClick={() => { handleExport('testbench'); setShowExportMenu(false); }} className="block w-full text-left px-4 py-2 text-xs transition-colors hover:bg-black/10 dark:hover:bg-white/10 font-bold text-green-500 drop-shadow-[0_0_2px_rgba(34,197,94,0.3)]">
+                        Generate Testbench
+                    </button>
+                </div>
+            )}
+        </div>
       </div>
       
       {/* TABS */}

@@ -108,9 +108,7 @@ export default function Sidebar() {
             <ToolItem type="logicGate" label="NOR" icon={ICONS.NOR} onDragStart={onDragStart} colorClass="text-fuchsia-500 group-hover:text-fuchsia-400" />
             <ToolItem type="logicGate" label="XOR" icon={ICONS.XOR} onDragStart={onDragStart} colorClass="text-teal-500 group-hover:text-teal-400" />
             <ToolItem type="logicGate" label="XNOR" icon={ICONS.XNOR} onDragStart={onDragStart} colorClass="text-cyan-500 group-hover:text-cyan-400" />
-            <div className="col-span-2"> 
-                <ToolItem type="logicGate" label="NOT" icon={ICONS.NOT} onDragStart={onDragStart} colorClass="text-rose-500 group-hover:text-rose-400" />
-            </div>
+            <ToolItem type="logicGate" label="NOT" icon={ICONS.NOT} onDragStart={onDragStart} colorClass="text-rose-500 group-hover:text-rose-400" />
             </Category>
 
             {Object.keys(customModules).length > 0 && (

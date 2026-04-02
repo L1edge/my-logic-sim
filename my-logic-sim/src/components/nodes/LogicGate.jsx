@@ -10,7 +10,7 @@ const gateSVG = {
   NAND: (isActive, color) => (
     <>
       <path d="M 0 0 L 0 50 L 35 50 C 65 50 80 25 80 25 C 80 25 65 0 35 0 Z" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
-      <circle cx="86" cy="25" r="6" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
+      <circle cx="92" cy="25" r="6" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
     </>
   ),
   OR: (isActive, color) => (
@@ -19,7 +19,7 @@ const gateSVG = {
   NOR: (isActive, color) => (
     <>
       <path d="M 0 0 C 15 5 15 45 0 50 C 40 50 80 25 80 25 C 80 25 40 0 0 0 Z" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
-      <circle cx="86" cy="25" r="6" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
+      <circle cx="92" cy="25" r="6" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
     </>
   ),
   XOR: (isActive, color) => (
@@ -32,7 +32,7 @@ const gateSVG = {
     <>
       <path d="M -5 0 C 10 5 10 45 -5 50" fill="none" stroke={color.border} strokeWidth="2" />
       <path d="M 3 0 C 18 5 18 45 3 50 C 43 50 83 25 83 25 C 83 25 43 0 3 0 Z" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
-      <circle cx="89" cy="25" r="6" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
+      <circle cx="92" cy="25" r="6" fill={isActive ? color.fill : 'var(--gate-fill)'} stroke={color.border} strokeWidth="2" />
     </>
   ),
   NOT: (isActive, color) => (
@@ -57,7 +57,7 @@ export default memo(function LogicGate({ id, data, selected }) {
   const updateNodeData = useStore((state) => state.updateNodeData);
   const isHigh = data.value > 0;
 
-  // Визначаємо тип
+
   let type = (data.type || 'AND').toUpperCase();
   const isNot = type === 'NOT' || (type.includes('NOT') && !['NAND', 'NOR', 'XNOR'].includes(type));
   if (isNot) type = 'NOT';
@@ -80,7 +80,7 @@ export default memo(function LogicGate({ id, data, selected }) {
       className={`relative transition-all duration-300 group ${selected ? 'ring-2 ring-blue-500 ring-offset-4' : ''}`}
       style={{ width: isNot ? 70 : 90, height: dynamicHeight, ...glowStyle }} 
     >
-      {/* SVG ТІЛЬКИ ДЛЯ ФОРМИ */}
+
       <svg 
         width="100%" height="100%" 
         viewBox={['XOR', 'XNOR'].includes(type) ? "-5 0 95 50" : (isNot ? "0 0 70 50" : "0 0 90 50")} 
@@ -90,14 +90,14 @@ export default memo(function LogicGate({ id, data, selected }) {
         {renderSvg(isHigh, colors)} 
       </svg>
       
-      {/* ТЕКСТ ОКРЕМИМ DIV-ОМ (ЩОБ НЕ РОЗТЯГУВАВСЯ) */}
+
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <span 
             className={`font-black tracking-wider select-none ${isNot ? '-ml-2' : ''}`}
             style={{ 
                 fontSize: '10px',
-                color: 'var(--text-primary)', // Адаптивний колір (чорний у світлій темі)
-                transform: 'scale(1)', // Гарантуємо відсутність деформації
+                color: 'var(--text-primary)',
+                transform: 'scale(1)', 
                 textAlign: 'center'
             }}
           >

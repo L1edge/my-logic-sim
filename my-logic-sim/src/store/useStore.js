@@ -14,6 +14,7 @@ const useStore = create(
         [defaultProjectId]: { id: defaultProjectId, name: 'Untitled Circuit', nodes: [], edges: [] }
       },
       activeProjectId: defaultProjectId,
+      simulatingProjectId: null, // 👈 ДОДАНО: запам'ятовує вкладку, на якій натиснули START
 
       isRunning: false,
       intervalId: null,
@@ -22,7 +23,7 @@ const useStore = create(
       theme: 'dark',
       setTheme: (theme) => set({ theme }),
 
-      // === UI STATE (ВИДИМІСТЬ ПАНЕЛЕЙ) ===
+      // === UI STATE ===
       isSidebarOpen: true,
       isPropertiesOpen: true,
 
@@ -46,7 +47,7 @@ const useStore = create(
           return { customModules: newMods };
       }),
 
-      // === WAVEFORM (ЧАСОВІ ДІАГРАМИ) ===
+      // === WAVEFORM ===
       isWaveformOpen: false,
       waveformSignals: [], 
       waveformData: [],
@@ -62,7 +63,6 @@ const useStore = create(
           waveformSignals: s.waveformSignals.filter(sig => sig.id !== edgeId)
       })),
 
-      // Функція запису історії
       recordWaveformStep: (currentNodes, currentEdges) => {
         const { waveformSignals, waveformData } = get();
         if (waveformSignals.length === 0) return;
@@ -98,6 +98,11 @@ const useStore = create(
         }));
       },
       closeProject: (id) => {
+          // 👈 ДОДАНО: Якщо ми закриваємо вкладку, де йде симуляція - зупиняємо її!
+          if (get().simulatingProjectId === id) {
+              get().stopSimulation();
+          }
+
           set(state => {
             const { [id]: _, ...rest } = state.projects;
             const newActive = id === state.activeProjectId ? (Object.keys(rest)[0] || nanoid()) : state.activeProjectId;
@@ -163,37 +168,53 @@ const useStore = create(
         if (isRunning) get().runSimulationStep();
       },
 
+      // === SIMULATION CONTROL ===
       startSimulation: () => {
-        if (get().intervalId) return; 
+        if (get().intervalId) clearInterval(get().intervalId); // Захист
         get().runSimulationStep();
         const interval = setInterval(() => { get().runSimulationStep(); }, 100); 
-        set({ isRunning: true, intervalId: interval });
+        set({ 
+            isRunning: true, 
+            intervalId: interval,
+            simulatingProjectId: get().activeProjectId // 👈 ДОДАНО: прив'язуємо до поточної вкладки
+        });
       },
 
       stopSimulation: () => {
-        const { intervalId, activeProjectId, projects } = get();
+        const { intervalId, activeProjectId, projects, simulatingProjectId } = get();
         if (intervalId) clearInterval(intervalId);
 
-        const currentProject = projects[activeProjectId];
-        const resetNodes = currentProject.nodes.map(node => {
-            if (node.type === 'inputNode' || node.type === 'constantNode') return node;
-            return { ...node, data: { ...node.data, value: null } };
-        });
-        const resetEdges = currentProject.edges.map(edge => ({
-            ...edge, animated: false, className: '', type: 'smoothstep', style: { ...edge.style, stroke: '#555', strokeWidth: 2 }
-        }));
+        // 👈 ДОДАНО: Скидаємо граф саме тієї вкладки, яка симулювалася (навіть якщо ми на іншій)
+        const targetId = simulatingProjectId || activeProjectId;
+        const currentProject = projects[targetId];
+
+        if (currentProject) {
+            const resetNodes = currentProject.nodes.map(node => {
+                if (node.type === 'inputNode' || node.type === 'constantNode') return node;
+                return { ...node, data: { ...node.data, value: null } };
+            });
+            const resetEdges = currentProject.edges.map(edge => ({
+                ...edge, animated: false, className: '', type: 'smoothstep', style: { ...edge.style, stroke: '#555', strokeWidth: 2 }
+            }));
+
+            set({ projects: { ...projects, [targetId]: { ...currentProject, nodes: resetNodes, edges: resetEdges } } });
+        }
 
         set({ 
             isRunning: false, 
             intervalId: null,
+            simulatingProjectId: null, // 👈 ДОДАНО: Очищаємо прив'язку
             testBenchCounter: 0,
-            waveformData: [], 
-            projects: { ...projects, [activeProjectId]: { ...currentProject, nodes: resetNodes, edges: resetEdges } }
+            waveformData: [] 
         });
       },
 
       stepSimulation: () => {
-        const { activeProjectId, projects, testBenchCounter } = get();
+        const { activeProjectId, projects, testBenchCounter, simulatingProjectId } = get();
+        
+        // 👈 ДОДАНО: Не дозволяємо робити "крок", якщо ми перейшли на іншу вкладку
+        if (simulatingProjectId && activeProjectId !== simulatingProjectId) return;
+
         const currentProject = projects[activeProjectId];
         
         const inputNodes = currentProject.nodes
@@ -219,7 +240,11 @@ const useStore = create(
       },
 
       runSimulationStep: () => {
-            const { activeProjectId, projects, customModules } = get(); 
+            const { activeProjectId, projects, customModules, simulatingProjectId } = get(); 
+            
+            // 🛑 ПЕРЕВІРКА: «Я зараз у активній вкладці? Якщо ні — відпочиваємо»
+            if (simulatingProjectId && activeProjectId !== simulatingProjectId) return;
+
             const currentProject = projects[activeProjectId];
             
             const { updatedNodes, updatedEdges } = evaluateCircuit(currentProject.nodes, currentProject.edges, customModules); 
@@ -274,7 +299,6 @@ const useStore = create(
         theme: state.theme,
         testBenchCounter: state.testBenchCounter,
         customModules: state.customModules,
-        // Зберігаємо стан панелей
         isSidebarOpen: state.isSidebarOpen,
         isPropertiesOpen: state.isPropertiesOpen
       }),

@@ -45,6 +45,27 @@ html, body, #root, #app-container {
   --node-output-bg: #ffffff; --node-output-border: #f97316; --node-output-header: #ffedd5; --node-output-text: #9a3412; --node-output-val-color: #000000;
 }
 
+[data-theme='light'] aside .grid > div {
+  background-color: #ffffff !important; /* Білий фон за замовчуванням */
+  border-color: #e5e7eb !important;     /* Світло-сірий бордер */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important; /* Легка тінь для об'єму */
+}
+
+/* Коли наводимо мишкою (Hover) */
+[data-theme='light'] aside .grid > div:hover {
+  background-color: #c5c5c7 !important; /* Світло-сірий фон при наведенні (tailwind gray-100) */
+  border-color: #d1d5db !important;     /* Трохи темніший бордер */
+  box-shadow: none !important;          /* Прибираємо тінь, щоб кнопка "втискалася" */
+}
+
+/* Прибираємо білий колір тексту від Tailwind, якщо він там лишився */
+[data-theme='light'] aside .grid > div span {
+  opacity: 0.8 !important;
+}
+[data-theme='light'] aside .grid > div:hover span {
+  opacity: 1 !important;
+}
+
 /* ========================================= */
 /* --- DARK THEME --- */
 /* ========================================= */
