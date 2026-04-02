@@ -32,7 +32,7 @@ To run the project locally on your computer, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
+   git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
    cd my-logic-sim
     ```
 2.  **Install dependencies:**
@@ -90,7 +90,7 @@ LogicSim — це сучасне кросплатформне веб-серед�
     Клонуйте репозиторій:
     Bash
 
-    git clone [https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
+    git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
     cd my-logic-sim
 
     Встановіть залежності:
@@ -149,7 +149,7 @@ Aby uruchomić projekt lokalnie na swoim komputerze, wykonaj następujące kroki
     Sklonuj repozytorium:
     Bash
 
-    git clone [https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
+    git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
     cd my-logic-sim
 
     Zainstaluj zależności:
