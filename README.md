@@ -1,47 +1,39 @@
-Ось твій файл `README.md`, підготовлений одразу трьома мовами: англійською, українською та польською. Ти можеш скопіювати весь цей текст і вставити його у свій репозиторій — на GitHub дуже популярна практика робити багатомовні README (кожна мова йде одна за одною або розділена лінками).
-
------
-
 # ⚡ LogicSim - Web-based Digital Logic Simulator
 
-🌎 **Languages:** [English](https://www.google.com/search?q=%23english) | [Українська](https://www.google.com/search?q=%23%D1%83%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D1%81%D1%8C%D0%BA%D0%B0) | [Polski](https://www.google.com/search?q=%23polski)
+🌎 **Languages:** [English](#english) | [Українська](#українська) | [Polski](#polski)
 
------
+---
 
-## \<a id="english"\>\</a\> 🇬🇧 English
+## <a id="english"></a> 🇬🇧 English
 
 **LogicSim** is a modern, cross-platform web environment for automated design, interactive simulation, and analysis of digital logic circuits. The project was created as a lightweight, fast, and accessible alternative to heavyweight desktop EDA (Electronic Design Automation) software like Active-HDL or Quartus.
 
 🎓 *The project was developed as part of a Bachelor's thesis.*
 
 ### ✨ Key Features
-
-  * 🖱️ **Interactive Graphical Editor:** Drag-and-Drop circuit building on an infinite canvas (React Flow).
-  * ⚙️ **Real-time Simulation:** Discrete-event simulation using optimized bitwise operations. Instant visualization of signal flow (neon wire animation) and gate states.
-  * 📦 **Rich Component Library:** Basic logic gates (AND, OR, XOR, NAND, NOR, XNOR, NOT) with a dynamic number of inputs (1 to 8), signal generators, constants, and indicators.
-  * 📝 **HDL Export:** Automatic translation of the visual circuit graph into professional structural **Verilog** and **VHDL** code.
-  * 🧪 **Testbench Generation:** Automatic creation of an exhaustive Testbench for external verification of the designed circuits.
-  * 📈 **Waveform Analyzer:** Built-in diagnostic tool based on HTML5 Canvas for real-time signal timing tracking.
-  * 🎨 **Modern UI/UX:** Adaptive UI themes, including a unique "Liquid Glass" theme with frosted glass effects (`backdrop-filter`).
-  * 💾 **Project Saving:** Serialization of the graph state into JSON format for saving and sharing circuits.
+* 🖱️ **Interactive Graphical Editor:** Drag-and-Drop circuit building on an infinite canvas (React Flow).
+* ⚙️ **Real-time Simulation:** Discrete-event simulation using optimized bitwise operations. Instant visualization of signal flow (neon wire animation) and gate states.
+* 📦 **Rich Component Library:** Basic logic gates (AND, OR, XOR, NAND, NOR, XNOR, NOT) with a dynamic number of inputs (1 to 8), signal generators, constants, and indicators.
+* 📝 **HDL Export:** Automatic translation of the visual circuit graph into professional structural **Verilog** and **VHDL** code.
+* 🧪 **Testbench Generation:** Automatic creation of an exhaustive Testbench for external verification of the designed circuits.
+* 📈 **Waveform Analyzer:** Built-in diagnostic tool based on HTML5 Canvas for real-time signal timing tracking.
+* 🎨 **Modern UI/UX:** Adaptive UI themes, including a unique "Liquid Glass" theme with frosted glass effects (`backdrop-filter`).
+* 💾 **Project Saving:** Serialization of the graph state into JSON format for saving and sharing circuits.
 
 ### 🛠 Tech Stack
-
-  * **Frontend Framework:** React.js (v18+)
-  * **State Management:** Zustand (high-performance state management without unnecessary re-renders)
-  * **Graph Engine:** React Flow (hardware-accelerated node transformations and rendering)
-  * **Styling:** Tailwind CSS + CSS Custom Properties
-  * **Build Tool:** Vite
-  * **Others:** HTML5 Canvas API (for Waveform), HTML5 Drag-and-Drop API
+* **Frontend Framework:** React.js (v18+)
+* **State Management:** Zustand
+* **Graph Engine:** React Flow
+* **Styling:** Tailwind CSS + CSS Custom Properties
+* **Build Tool:** Vite
 
 ### 🚀 Installation and Setup (Local Development)
-
 To run the project locally on your computer, follow these steps:
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/username/my-logic-sim.git
-    cd my-logic-sim
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
+   cd my-logic-sim
     ```
 2.  **Install dependencies:**
     Make sure you have [Node.js](https://www.google.com/search?q=https://nodejs.org/) installed.
