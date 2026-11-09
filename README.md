@@ -7,7 +7,7 @@
 ## <a id="english"></a> 🇬🇧 English
 
 # LogicSim — Interactive Logic Circuit Simulator
-![LogicSim Demo](.Logicsimdemo.gif)
+![LogicSim Demo](Logicsimdemo.gif)
 > An interactive web-based simulator for designing and testing digital logic circuits directly in the browser.
 
 
