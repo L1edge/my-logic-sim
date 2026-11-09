@@ -63,7 +63,7 @@ npm run dev
 
 ---
 
-##  🇺🇦 Українська
+##  <a id="українська"> 🇺🇦 Українська</a> 
 
 **LogicSim** — це сучасне кросплатформне веб-середовище для автоматизованого проєктування, інтерактивного моделювання та аналізу цифрових логічних схем. Проєкт створений як легка, швидка та доступна альтернатива важковаговим десктопним САПР (EDA), таким як Active-HDL чи Quartus.
 
@@ -121,7 +121,7 @@ npm run dev
 
 ---
 
-##  🇵🇱 Polski
+##  <a id="polski"> 🇵🇱 Polski </a> 
 
 **LogicSim** to nowoczesne, wieloplatformowe środowisko webowe do zautomatyzowanego projektowania, interaktywnej symulacji i analizy cyfrowych układów logicznych. Projekt powstał jako lekka, szybka i przystępna alternatywa dla ciężkich, desktopowych programów EDA (Electronic Design Automation), takich jak Active-HDL czy Quartus.
 
