@@ -6,6 +6,11 @@
 
 ## <a id="english"></a> 🇬🇧 English
 
+# LogicSim — Interactive Logic Circuit Simulator
+![LogicSim Demo](.logicsim-demo.gif)
+> An interactive web-based simulator for designing and testing digital logic circuits directly in the browser.
+
+
 **LogicSim** is a modern, cross-platform web environment for automated design, interactive simulation, and analysis of digital logic circuits. The project was created as a lightweight, fast, and accessible alternative to heavyweight desktop EDA (Electronic Design Automation) software like Active-HDL or Quartus.
 
 🎓 *The project was developed as part of a Bachelor's thesis.*
