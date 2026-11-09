@@ -10,157 +10,168 @@
 
 🎓 *The project was developed as part of a Bachelor's thesis.*
 
+🚀 **Live Demo:** Try LogicSim directly in your browser without installation: [https://logicsim-nine.vercel.app/](https://logicsim-nine.vercel.app/)
+
 ### ✨ Key Features
-* 🖱️ **Interactive Graphical Editor:** Drag-and-Drop circuit building on an infinite canvas (React Flow).
-* ⚙️ **Real-time Simulation:** Discrete-event simulation using optimized bitwise operations. Instant visualization of signal flow (neon wire animation) and gate states.
-* 📦 **Rich Component Library:** Basic logic gates (AND, OR, XOR, NAND, NOR, XNOR, NOT) with a dynamic number of inputs (1 to 8), signal generators, constants, and indicators.
-* 📝 **HDL Export:** Automatic translation of the visual circuit graph into professional structural **Verilog** and **VHDL** code.
-* 🧪 **Testbench Generation:** Automatic creation of an exhaustive Testbench for external verification of the designed circuits.
-* 📈 **Waveform Analyzer:** Built-in diagnostic tool based on HTML5 Canvas for real-time signal timing tracking.
-* 🎨 **Modern UI/UX:** Adaptive UI themes, including a unique "Liquid Glass" theme with frosted glass effects (`backdrop-filter`).
-* 💾 **Project Saving:** Serialization of the graph state into JSON format for saving and sharing circuits.
+- 🖱️ **Interactive Graphical Editor:** Drag-and-Drop circuit building on an infinite canvas (React Flow).
+- ⚙️ **Real-time Simulation:** Discrete-event simulation using optimized bitwise operations. Instant visualization of signal flow (neon wire animation) and gate states.
+- 📦 **Rich Component Library:** Basic logic gates (AND, OR, XOR, NAND, NOR, XNOR, NOT) with a dynamic number of inputs (1 to 8), signal generators, constants, and indicators.
+- 📝 **HDL Export:** Automatic translation of the visual circuit graph into professional structural **Verilog** and **VHDL** code.
+- 🧪 **Testbench Generation:** Automatic creation of an exhaustive Testbench for external verification of the designed circuits.
+- 📈 **Waveform Analyzer:** Built-in diagnostic tool based on HTML5 Canvas for real-time signal timing tracking.
+- 🎨 **Modern UI/UX:** Adaptive UI themes, including a unique "Liquid Glass" theme with frosted glass effects (`backdrop-filter`).
+- 💾 **Project Saving:** Serialization of the graph state into JSON format for saving and sharing circuits.
 
 ### 🛠 Tech Stack
-* **Frontend Framework:** React.js (v18+)
-* **State Management:** Zustand
-* **Graph Engine:** React Flow
-* **Styling:** Tailwind CSS + CSS Custom Properties
-* **Build Tool:** Vite
+- **Frontend Framework:** React.js (v18+)
+- **State Management:** Zustand
+- **Graph Engine:** React Flow
+- **Styling:** Tailwind CSS + CSS Custom Properties
+- **Build Tool:** Vite
 
 ### 🚀 Installation and Setup (Local Development)
 To run the project locally on your computer, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
+   git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/L1edge/my-logic-sim.git)
    cd my-logic-sim
-    ```
-2.  **Install dependencies:**
-    Make sure you have [Node.js](https://www.google.com/search?q=https://nodejs.org/) installed.
-    ```bash
-    npm install
-    ```
-3.  **Start the development server:**
-    ```bash
-    npm run dev
-    ```
-4.  **Open your browser** and navigate to: `http://localhost:5173`
 
------
+```
 
-<a id="українська"></a> 🇺🇦 Українська
+2. **Install dependencies:**
+Make sure you have [Node.js](https://nodejs.org/) installed.
+```bash
+npm install
 
-LogicSim — це сучасне кросплатформне веб-середовище для автоматизованого проєктування, інтерактивного моделювання та аналізу цифрових логічних схем. Проєкт створений як легка, швидка та доступна альтернатива важковаговим десктопним САПР (EDA), таким як Active-HDL чи Quartus.
+```
 
-🎓 Проєкт розроблено в рамках бакалаврської кваліфікаційної роботи.
-✨ Головні можливості
 
-    🖱️ Інтерактивний графічний редактор: Побудова схем за допомогою Drag-and-Drop на базі нескінченного полотна (React Flow).
+3. **Start the development server:**
+```bash
+npm run dev
 
-    ⚙️ Симуляція в реальному часі: Дискретно-подієве моделювання з використанням оптимізованих побітових операцій. Миттєва візуалізація руху сигналу (неонова анімація дротів) та станів вентилів.
+```
 
-    📦 Багата бібліотека компонентів: Базові логічні вентилі (AND, OR, XOR, NAND, NOR, XNOR, NOT) з динамічною кількістю входів (від 1 до 8), генератори сигналів, константи та індикатори.
 
-    📝 Експорт у HDL: Автоматична трансляція візуального графа схеми у професійний структурний код Verilog та VHDL.
+4. **Open your browser** and navigate to: `http://localhost:5173`
 
-    🧪 Генерація Testbench: Автоматичне створення вичерпного тестового оточення (Testbench) для зовнішньої верифікації розроблених схем.
+---
 
-    📈 Аналізатор часових діаграм (Waveform): Вбудований інструмент діагностики на базі HTML5 Canvas для відстеження таймінгів сигналів у реальному часі.
+##  🇺🇦 Українська
 
-    🎨 Сучасний UI/UX: Адаптивні теми оформлення, включаючи унікальну тему "Liquid Glass" з ефектами матового скла (backdrop-filter).
+**LogicSim** — це сучасне кросплатформне веб-середовище для автоматизованого проєктування, інтерактивного моделювання та аналізу цифрових логічних схем. Проєкт створений як легка, швидка та доступна альтернатива важковаговим десктопним САПР (EDA), таким як Active-HDL чи Quartus.
 
-    💾 Збереження проєктів: Серіалізація стану графа у формат JSON для збереження та обміну схемами.
+🎓 *Проєкт розроблено в рамках бакалаврської кваліфікаційної роботи.*
 
-🛠 Технологічний стек
+🚀 **Онлайн-демо:** Протестуйте LogicSim прямо у браузері без встановлення: [https://logicsim-nine.vercel.app/](https://logicsim-nine.vercel.app/)
 
-    Frontend Framework: React.js (v18+)
+### ✨ Головні можливості
 
-    State Management: Zustand
+* 🖱️ **Інтерактивний графічний редактор:** Побудова схем за допомогою Drag-and-Drop на базі нескінченного полотна (React Flow).
+* ⚙️ **Симуляція в реальному часі:** Дискретно-подієве моделювання з використанням оптимізованих побітових операцій. Миттєва візуалізація руху сигналу (неонова анімація дротів) та станів вентилів.
+* 📦 **Багата бібліотека компонентів:** Базові логічні вентилі (AND, OR, XOR, NAND, NOR, XNOR, NOT) з динамічною кількістю входів (від 1 до 8), генератори сигналів, константи та індикатори.
+* 📝 **Експорт у HDL:** Автоматична трансляція візуального графа схеми у професійний структурний код Verilog та VHDL.
+* 🧪 **Генерація Testbench:** Автоматичне створення вичерпного тестового оточення (Testbench) для зовнішньої верифікації розроблених схем.
+* 📈 **Аналізатор часових діаграм (Waveform):** Вбудований інструмент діагностики на базі HTML5 Canvas для відстеження таймінгів сигналів у реальному часі.
+* 🎨 **Сучасний UI/UX:** Адаптивні теми оформлення, включаючи унікальну тему "Liquid Glass" з ефектами матового скла (`backdrop-filter`).
+* 💾 **Збереження проєктів:** Серіалізація стану графа у формат JSON для збереження та обміну схемами.
 
-    Graph Engine: React Flow
+### 🛠 Технологічний стек
 
-    Styling: Tailwind CSS + CSS Custom Properties
+* **Frontend Framework:** React.js (v18+)
+* **State Management:** Zustand
+* **Graph Engine:** React Flow
+* **Styling:** Tailwind CSS + CSS Custom Properties
+* **Build Tool:** Vite
 
-    Build Tool: Vite
-
-🚀 Встановлення та запуск (Local Development)
+### 🚀 Встановлення та запуск (Local Development)
 
 Щоб запустити проєкт локально на вашому комп'ютері, виконайте наступні кроки:
 
-    Клонуйте репозиторій:
-    Bash
+1. **Клонуйте репозиторій:**
+```bash
+git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/L1edge/my-logic-sim.git)
+cd my-logic-sim
 
-    git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
-    cd my-logic-sim
+```
 
-    Встановіть залежності:
-    Переконайтеся, що у вас встановлений Node.js.
-    Bash
 
-    npm install
+2. **Встановіть залежності:**
+Переконайтеся, що у вас встановлений [Node.js](https://nodejs.org/).
+```bash
+npm install
 
-    Запустіть сервер розробки:
-    Bash
+```
 
-    npm run dev
 
-    Відкрийте браузер і перейдіть за адресою: http://localhost:5173
------
+3. **Запустіть сервер розробки:**
+```bash
+npm run dev
 
-<a id="polski"></a> 🇵🇱 Polski
+```
 
-LogicSim to nowoczesne, wieloplatformowe środowisko webowe do zautomatyzowanego projektowania, interaktywnej symulacji i analizy cyfrowych układów logicznych. Projekt powstał jako lekka, szybka i przystępna alternatywa dla ciężkich, desktopowych programów EDA (Electronic Design Automation), takich jak Active-HDL czy Quartus.
 
-🎓 Projekt został zrealizowany w ramach pracy inżynierskiej / licencjackiej.
-✨ Główne możliwości
+4. **Відкрийте браузер** і перейдіть за адресою: `http://localhost:5173`
 
-    🖱️ Interaktywny edytor graficzny: Budowanie układów metodą Drag-and-Drop na nieskończonym płótnie (React Flow).
+---
 
-    ⚙️ Symulacja w czasie rzeczywistym: Symulacja zdarzeń dyskretnych z wykorzystaniem zoptymalizowanych operacji bitowych. Błyskawiczna wizualizacja przepływu sygnału (neonowa animacja przewodów) i stanów bramek.
+##  🇵🇱 Polski
 
-    📦 Bogata biblioteka komponentów: Podstawowe bramki logiczne (AND, OR, XOR, NAND, NOR, XNOR, NOT) z dynamiczną liczbą wejść (od 1 do 8), generatory sygnałów, stałe i wskaźniki.
+**LogicSim** to nowoczesne, wieloplatformowe środowisko webowe do zautomatyzowanego projektowania, interaktywnej symulacji i analizy cyfrowych układów logicznych. Projekt powstał jako lekka, szybka i przystępna alternatywa dla ciężkich, desktopowych programów EDA (Electronic Design Automation), takich jak Active-HDL czy Quartus.
 
-    📝 Eksport do HDL: Automatyczne tłumaczenie wizualnego grafu układu na profesjonalny kod strukturalny Verilog i VHDL.
+🎓 *Projekt został zrealizowany w ramach pracy inżynierskiej / licencjackiej.*
 
-    🧪 Generowanie Testbench: Automatyczne tworzenie kompleksowego środowiska testowego (Testbench) do zewnętrznej weryfikacji zaprojektowanych układów.
+🚀 **Demo na żywo:** Wypróbuj LogicSim bezpośrednio w przeglądarce bez instalacji: [https://logicsim-nine.vercel.app/](https://logicsim-nine.vercel.app/)
 
-    📈 Analizator przebiegów czasowych (Waveform): Wbudowane narzędzie diagnostyczne oparte na HTML5 Canvas do śledzenia synchronizacji sygnałów w czasie rzeczywistym.
+### ✨ Główne możliwości
 
-    🎨 Nowoczesny UI/UX: Adaptacyjne motywy interfejsu, w tym unikalny motyw "Liquid Glass" z efektem matowego szkła (backdrop-filter).
+* 🖱️ **Interaktywny edytor graficzny:** Budowanie układów metodą Drag-and-Drop na nieskończonym płótnie (React Flow).
+* ⚙️ **Symulacja w czasie rzeczywistym:** Symulacja zdarzeń dyskretnych z wykorzystaniem zoptymalizowanych operacji bitowych. Błyskawiczna wizualizacja przepływu sygnału (neonowa animacja przewodów) i stanów bramek.
+* 📦 **Bogata biblioteka komponentów:** Podstawowe bramki logiczne (AND, OR, XOR, NAND, NOR, XNOR, NOT) z dynamiczną liczbą wejść (od 1 do 8), generatory sygnałów, stałe i wskaźniki.
+* 📝 **Eksport do HDL:** Automatyczne tłumaczenie wizualnego grafu układu na profesjonalny kod strukturalny Verilog i VHDL.
+* 🧪 **Generowanie Testbench:** Automatyczne tworzenie kompleksowego środowiska testowego (Testbench) do zewnętrznej weryfikacji zaprojektowanych układów.
+* 📈 **Analizator przebiegów czasowych (Waveform):** Wbudowane narzędzie diagnostyczne oparte na HTML5 Canvas do śledzenia synchronizacji sygnałów w czasie rzeczywistym.
+* 🎨 **Nowoczesny UI/UX:** Adaptacyjne motywy interfejsu, w tym unikalny motyw "Liquid Glass" z efektem matowego szkła (`backdrop-filter`).
+* 💾 **Zapisywanie projektów:** Serializacja stanu grafu do formatu JSON w celu zapisywania i udostępniania układów.
 
-    💾 Zapisywanie projektów: Serializacja stanu grafu do formatu JSON w celu zapisywania i udostępniania układów.
+### 🛠 Stos technologiczny
 
-🛠 Stos technologiczny
+* **Frontend Framework:** React.js (v18+)
+* **State Management:** Zustand
+* **Graph Engine:** React Flow
+* **Styling:** Tailwind CSS + CSS Custom Properties
+* **Build Tool:** Vite
 
-    Frontend Framework: React.js (v18+)
-
-    State Management: Zustand
-
-    Graph Engine: React Flow
-
-    Styling: Tailwind CSS + CSS Custom Properties
-
-    Build Tool: Vite
-
-🚀 Instalacja i uruchomienie (Local Development)
+### 🚀 Instalacja i uruchomienie (Local Development)
 
 Aby uruchomić projekt lokalnie na swoim komputerze, wykonaj następujące kroki:
 
-    Sklonuj repozytorium:
-    Bash
+1. **Sklonuj repozytorium:**
+```bash
+git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/L1edge/my-logic-sim.git)
+cd my-logic-sim
 
-    git clone [https://github.com/L1edge/my-logic-sim.git](https://github.com/ВАШ_ЮЗЕРНЕЙМ/my-logic-sim.git)
-    cd my-logic-sim
+```
 
-    Zainstaluj zależności:
-    Upewnij się, że masz zainstalowanego Node.js.
-    Bash
 
-    npm install
+2. **Zainstaluj zależności:**
+Upewnij się, że masz zainstalowanego [Node.js](https://nodejs.org/).
+```bash
+npm install
 
-    Uruchom serwer deweloperski:
-    Bash
+```
 
-    npm run dev
 
-    Otwórz przeglądarkę i przejdź pod adres: http://localhost:5173
+3. **Uruchom serwer deweloperski:**
+```bash
+npm run dev
+
+```
+
+
+4. **Otwórz przeglądarkę** i przejdź pod adres: `http://localhost:5173`
+
+```
+
+```
